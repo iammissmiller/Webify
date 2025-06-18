@@ -960,7 +960,7 @@ ${code.javascript}
   description: "The shared code has been loaded successfully.",
 });
 
-      } catch (err) {
+      } catch (error) {
         toast.error("Invalid share link", {
   description: "Could not load shared code.",
 });
