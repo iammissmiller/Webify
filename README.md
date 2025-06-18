@@ -28,10 +28,6 @@ Create a responsive, user-friendly platform where users can:
 * 🔹 Code Sharing (via URL or database)
 * 🔹 Optional: Save/Load snippets to/from cloud storage
 
-## 📸 Screenshots
-
-> ![Screenshot 2025-06-18 204325](https://github.com/user-attachments/assets/7baa473f-3cb6-4f66-95ae-7efad16df218)
-
 
 ## 🧩 Folder Structure (Simplified)
 
