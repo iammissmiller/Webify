@@ -1097,15 +1097,15 @@ ${code.javascript}
             >
               <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="html" className="flex items-center gap-2">
+                  <TabsTrigger value="html" className="flex items-center gap-2 cursor-pointer">
                     <FileText className="w-4 h-4" />
                     HTML
                   </TabsTrigger>
-                  <TabsTrigger value="css" className="flex items-center gap-2">
+                  <TabsTrigger value="css" className="flex items-center gap-2 cursor-pointer">
                     <Palette className="w-4 h-4" />
                     CSS
                   </TabsTrigger>
-                  <TabsTrigger value="javascript" className="flex items-center gap-2">
+                  <TabsTrigger value="javascript" className="flex items-center gap-2 cursor-pointer">
                     <Zap className="w-4 h-4" />
                     JS
                   </TabsTrigger>
