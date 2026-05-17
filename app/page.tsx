@@ -2,22 +2,23 @@
 
 import type React from "react"
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react"
+import { useState, useEffect, useMemo, useRef} from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+
+import { CopyButton } from "@/components/ui/copy-button"
+
 import {
   Code2,
   Play,
-  Share2,
   Download,
   Upload,
   Layout,
   Maximize2,
   Minimize2,
-  Check,
   FileText,
   Palette,
   Zap,
@@ -930,7 +931,6 @@ export default function CodeEditor() {
   const [layout, setLayout] = useState<LayoutType>("split")
   const [activeTab, setActiveTab] = useState<keyof CodeContent>("html")
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const previewRef = useRef<HTMLIFrameElement>(null)
   const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
@@ -1004,32 +1004,6 @@ export default function CodeEditor() {
 
   }
 
-  const shareCode = async () => {
-    const shareData = {
-      html: code.html,
-      css: code.css,
-      javascript: code.javascript,
-    }
-
-    const encoded = btoa(JSON.stringify(shareData))
-    const shareUrl = `${window.location.origin}?code=${encoded}`
-
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-      toast("Link copied!", {
-  description: "Share URL has been copied to clipboard.",
-});
-
-    } catch (err) {
-      console.error("Clipboard copy failed:", err);
-      toast.error("Share failed", {
-  description: "Could not copy share URL to clipboard.",
-});
-
-    }
-  }
 
   const downloadCode = () => {
     const combinedCode = `<!DOCTYPE html>
@@ -1183,10 +1157,19 @@ ${code.javascript}
               Download
             </Button>
 
-            <Button variant="outline" size="sm" onClick={shareCode}>
-              {copied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
-              {copied ? "Copied!" : "Share"}
-            </Button>
+            <CopyButton
+              text={
+                typeof window !== "undefined"
+                  ? `${window.location.origin}?code=${btoa(
+                      JSON.stringify({
+                        html: code.html,
+                        css: code.css,
+                        javascript: code.javascript,
+                      })
+                    )}`
+                  : ""
+                }
+              />
 
             <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)}>
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
