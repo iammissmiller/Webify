@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://webify-five.vercel.app/sitemap.xml
