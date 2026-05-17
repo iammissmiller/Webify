@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -41,6 +41,126 @@ interface CodeContent {
   html: string
   css: string
   javascript: string
+}
+
+interface HtmlValidationResult {
+  isValid: boolean
+  message?: string
+}
+
+const voidHtmlTags = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+])
+
+function createPreviewErrorHtml(message: string) {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HTML Syntax Error</title>
+        <style>
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: Arial, sans-serif;
+            background: #fef2f2;
+            color: #991b1b;
+          }
+          .panel {
+            max-width: 640px;
+            padding: 24px;
+            margin: 24px;
+            border: 1px solid #fecaca;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 12px 40px rgba(153, 27, 27, 0.12);
+          }
+          h1 {
+            margin: 0 0 12px;
+            font-size: 20px;
+          }
+          p {
+            margin: 0;
+            line-height: 1.6;
+            white-space: pre-wrap;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="panel">
+          <h1>HTML syntax error</h1>
+          <p>${message}</p>
+        </div>
+      </body>
+    </html>
+  `
+}
+
+function validateHtmlSyntax(html: string): HtmlValidationResult {
+  let sanitizedHtml = html.replace(/<!--[\s\S]*?-->/g, "")
+
+  sanitizedHtml = sanitizedHtml.replace(
+    /<(script|style|textarea|title)\b([^>]*)>[\s\S]*?<\/\1>/gi,
+    (_match, tagName, attributes) => `<${tagName}${attributes}></${tagName}>`
+  )
+
+  const tagPattern = /<\/?([a-zA-Z][\w:-]*)([^>]*)>/g
+  const openTags: string[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = tagPattern.exec(sanitizedHtml))) {
+    const [fullTag, rawTagName] = match
+    const tagName = rawTagName.toLowerCase()
+    const isClosingTag = fullTag.startsWith("</")
+    const isSelfClosingTag = fullTag.endsWith("/>") || voidHtmlTags.has(tagName)
+
+    if (isClosingTag) {
+      const lastOpenTag = openTags.pop()
+      if (!lastOpenTag) {
+        return { isValid: false, message: `Unexpected closing tag </${tagName}>.` }
+      }
+
+      if (lastOpenTag !== tagName) {
+        return {
+          isValid: false,
+          message: `Expected </${lastOpenTag}> before </${tagName}>.`,
+        }
+      }
+
+      continue
+    }
+
+    if (!isSelfClosingTag) {
+      openTags.push(tagName)
+    }
+  }
+
+  if (openTags.length > 0) {
+    const lastOpenTag = openTags[openTags.length - 1]
+    return {
+      isValid: false,
+      message: `Unclosed <${lastOpenTag}> tag.`,
+    }
+  }
+
+  return { isValid: true }
 }
 
 interface Template {
@@ -813,6 +933,7 @@ export default function CodeEditor() {
   const [copied, setCopied] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const previewRef = useRef<HTMLIFrameElement>(null)
+  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
 
   // Initialize theme from storage/preferences on mount
   useEffect(() => {
@@ -840,8 +961,13 @@ export default function CodeEditor() {
     }
   }
 
-  const updatePreview = useCallback(() => {
+  useEffect(() => {
     if (!previewRef.current) return
+
+    if (!htmlValidation.isValid) {
+      previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
+      return
+    }
 
     const combinedCode = `
       <!DOCTYPE html>
@@ -864,12 +990,7 @@ export default function CodeEditor() {
     previewRef.current.src = url
 
     return () => URL.revokeObjectURL(url)
-  }, [code])
-
-  useEffect(() => {
-    const cleanup = updatePreview()
-    return cleanup
-  }, [updatePreview])
+  }, [code, htmlValidation])
 
   const handleCodeChange = (language: keyof CodeContent, value: string) => {
     setCode((prev) => ({ ...prev, [language]: value }))
@@ -1149,9 +1270,15 @@ ${code.javascript}
               <div className="flex items-center gap-2">
                 <Play className="w-4 h-4 text-green-600" />
                 <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
-                <Badge variant="secondary" className="text-xs">
-                  Auto-refresh
-                </Badge>
+                {htmlValidation.isValid ? (
+                  <Badge variant="secondary" className="text-xs">
+                    Auto-refresh
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-xs">
+                    HTML syntax error
+                  </Badge>
+                )}
               </div>
               <Button variant="outline" size="sm" onClick={() => window.open(previewRef.current?.src, "_blank")}>
                 <Maximize2 className="w-4 h-4 mr-2" />
