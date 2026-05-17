@@ -35,7 +35,10 @@ import { toast } from 'sonner'
 
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
-
+// Monaco Editor must be loaded client-side only.
+// It directly accesses browser APIs (window, Worker) that don't exist in Node.
+// Removing `ssr: false` or moving this import to a Server Component will
+// cause a hydration crash. Keep this dynamic import exactly as-is.
 // Dynamically import Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,

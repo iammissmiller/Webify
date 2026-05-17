@@ -10,14 +10,23 @@ Create a responsive, user-friendly platform where users can:
 
 * Write HTML, CSS, and JS in separate editors
 * Instantly see the output in a live preview window
-* Share code via a unique URL or database
+* Share code instantly via a shareable URL 
 * Optionally save and manage snippets with cloud storage
+
 
 ## 🛠️ Tech Stack
 
-* **Frontend**: Next.js
-* **Code Editor**: Monaco Editor (VS Code's editor)
+* **Framework**: Next.js 15 (App Router)
+* **Language**: TypeScript 5
+* **Code Editor**: Monaco Editor 0.52
+* **Styling**: Tailwind CSS 4
+* **UI Components**: shadcn/ui + Radix UI
+* **Icons**: Lucide React
+* **Toasts**: Sonner
+* **File Bundling**: JSZip
 * **Preview Engine**: HTML `<iframe>`
+
+
 
 ## 📚 Features
 
@@ -25,20 +34,39 @@ Create a responsive, user-friendly platform where users can:
 * 🔹 Monaco Editor Integration (syntax highlighting, autocompletion)
 * 🔹 Responsive Layout (Side-by-side & full preview modes)
 * 🔹 Template Support (start with boilerplates)
-* 🔹 Code Sharing (via URL or database)
-* 🔹 Optional: Save/Load snippets to/from cloud storage
+* 🔹 URL-based Code Sharing (base64-encoded, no login needed)
 
 
-## 🧩 Folder Structure (Simplified)
+## 🧩 Folder Structure
+
+This project uses the **Next.js App Router** (not Pages Router or Create React App).
 
 ```
-src/
-├── components/
-│   ├── monaco-editor.jsx
-├── App.js
-├── index.js
-public/
-└── index.html
+app/
+├── layout.tsx              # Root layout, fonts, metadata, Toaster
+├── page.tsx                # Main editor page (all state lives here)
+├── globals.css             # Tailwind base styles + CSS variables
+└── components/
+    └── monaco-editor.tsx   # Monaco wrapper — client-only (ssr: false)
+
+components/
+└── ui/                     # shadcn/ui components
+    ├── button.tsx
+    ├── badge.tsx
+    ├── tabs.tsx
+    ├── select.tsx
+    ├── separator.tsx
+    ├── sonner.tsx          # Toaster (theme-aware)
+    └── copy-button.tsx
+
+lib/
+└── utils.ts                # tailwind-merge utility (cn)
+
+public/                     # Static assets
+components.json             # shadcn/ui config
+next.config.ts
+tsconfig.json
+
 ```
 
 ## 🚧 Future Enhancements
@@ -48,14 +76,19 @@ public/
 * 🌐 Collaborative coding support
 * 🧠 AI-based code suggestions
 
+
 ## 📦 Installation
 
+> Requires **Node.js 18.18 or later**. Check your version with `node -v`.
+
 ```bash
-git clone https://github.com/yourusername/Webify.git
-cd online-code-editor
+git clone https://github.com/Debmallya-03/Webify.git
+cd Webify
 npm install
 npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 ---
 
 > Created with ❤️ by [Debmallya Bhandari](https://github.com/Debmallya-03)
