@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 
 import { CopyButton } from "@/components/ui/copy-button"
+import { CommandPalette, type Command } from "@/components/ui/command-palette"
 
 import {
   Code2,
@@ -24,6 +25,10 @@ import {
   Zap,
   Sun,
   Moon,
+  Search,
+  Link as LinkIcon,
+  Undo2,
+  Redo2,
 } from "lucide-react"
 import { toast } from 'sonner'
 
@@ -932,7 +937,12 @@ export default function CodeEditor() {
   const [activeTab, setActiveTab] = useState<keyof CodeContent>("html")
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const previewRef = useRef<HTMLIFrameElement>(null)
+  const activeEditorRef = useRef<{
+    focus: () => void
+    trigger: (source: string, handlerId: string, payload?: unknown) => void
+  } | null>(null)
   const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
 
   // Initialize theme from storage/preferences on mount
@@ -1095,7 +1105,183 @@ ${code.javascript}
     }
   }, [])
 
+  const copyShareLink = async () => {
+    if (typeof window === "undefined") return
+    try {
+      const url = `${window.location.origin}?code=${btoa(
+        JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }),
+      )}`
+      await navigator.clipboard.writeText(url)
+      toast("Link copied", { description: "Shareable link copied to clipboard." })
+    } catch (err) {
+      console.error("Clipboard copy failed:", err)
+      toast.error("Copy failed", { description: "Could not copy the share link." })
+    }
+  }
+
+  const commands = useMemo<Command[]>(() => {
+    const layoutCmd = (
+      id: string,
+      label: string,
+      value: LayoutType,
+      icon: React.ReactNode,
+    ): Command => ({
+      id,
+      label,
+      group: "Layout",
+      icon,
+      keywords: "view layout panel",
+      description: layout === value ? "Active" : undefined,
+      perform: () => setLayout(value),
+    })
+
+    const tabCmd = (
+      id: string,
+      label: string,
+      value: keyof CodeContent,
+      icon: React.ReactNode,
+    ): Command => ({
+      id,
+      label,
+      group: "Editor",
+      icon,
+      keywords: "tab file language",
+      description: activeTab === value ? "Active" : undefined,
+      perform: () => {
+        setActiveTab(value)
+        if (layout === "preview") setLayout("split")
+      },
+    })
+
+    return [
+      layoutCmd("layout-code", "Code only", "code", <Code2 className="w-4 h-4" />),
+      layoutCmd("layout-split", "Split view", "split", <Layout className="w-4 h-4" />),
+      layoutCmd("layout-preview", "Preview only", "preview", <Play className="w-4 h-4" />),
+
+      tabCmd("tab-html", "Go to HTML", "html", <FileText className="w-4 h-4" />),
+      tabCmd("tab-css", "Go to CSS", "css", <Palette className="w-4 h-4" />),
+      tabCmd("tab-js", "Go to JavaScript", "javascript", <Zap className="w-4 h-4" />),
+
+      {
+        id: "editor-undo",
+        label: "Undo",
+        group: "Editor",
+        icon: <Undo2 className="w-4 h-4" />,
+        keywords: "ctrl z revert history undo",
+        perform: () => {
+          const ed = activeEditorRef.current
+          if (ed) {
+            ed.focus()
+            ed.trigger("palette", "undo", null)
+          } else if (layout === "preview") {
+            setLayout("split")
+          }
+        },
+      },
+      {
+        id: "editor-redo",
+        label: "Redo",
+        group: "Editor",
+        icon: <Redo2 className="w-4 h-4" />,
+        keywords: "ctrl y ctrl shift z history redo",
+        perform: () => {
+          const ed = activeEditorRef.current
+          if (ed) {
+            ed.focus()
+            ed.trigger("palette", "redo", null)
+          } else if (layout === "preview") {
+            setLayout("split")
+          }
+        },
+      },
+
+      {
+        id: "action-import",
+        label: "Import HTML file",
+        group: "Actions",
+        icon: <Upload className="w-4 h-4" />,
+        keywords: "open upload load",
+        perform: importCode,
+      },
+      {
+        id: "action-download",
+        label: "Download project",
+        group: "Actions",
+        icon: <Download className="w-4 h-4" />,
+        keywords: "export save html",
+        perform: downloadCode,
+      },
+      {
+        id: "action-share",
+        label: "Copy shareable link",
+        group: "Actions",
+        icon: <LinkIcon className="w-4 h-4" />,
+        keywords: "url clipboard share",
+        perform: copyShareLink,
+      },
+      {
+        id: "action-open-tab",
+        label: "Open preview in new tab",
+        group: "Actions",
+        icon: <Maximize2 className="w-4 h-4" />,
+        keywords: "window external browser",
+        perform: () => {
+          if (previewRef.current?.src) window.open(previewRef.current.src, "_blank")
+        },
+      },
+      {
+        id: "action-fullscreen",
+        label: isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
+        group: "Actions",
+        icon: isFullscreen ? (
+          <Minimize2 className="w-4 h-4" />
+        ) : (
+          <Maximize2 className="w-4 h-4" />
+        ),
+        keywords: "expand maximize zoom",
+        perform: () => setIsFullscreen((v) => !v),
+      },
+      {
+        id: "action-theme",
+        label: theme === "light" ? "Switch to dark mode" : "Switch to light mode",
+        group: "Actions",
+        icon: theme === "light" ? (
+          <Moon className="w-4 h-4" />
+        ) : (
+          <Sun className="w-4 h-4" />
+        ),
+        keywords: "appearance dark light color",
+        perform: toggleTheme,
+      },
+
+      ...templates.map<Command>((t) => ({
+        id: `template-${t.id}`,
+        label: t.name,
+        description: t.description,
+        group: "Templates",
+        icon: t.icon,
+        keywords: `template starter ${t.name}`,
+        perform: () => loadTemplate(t),
+      })),
+    ]
+  }, [layout, activeTab, theme, isFullscreen, code])
+
+  
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        e.stopPropagation()
+        setPaletteOpen((open) => !open)
+      }
+    }
+    window.addEventListener("keydown", onKeyDown, true)
+    return () => window.removeEventListener("keydown", onKeyDown, true)
+  }, [])
+
   return (
+    <>
+    <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
     <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
@@ -1124,6 +1310,20 @@ ${code.javascript}
                 ))}
               </SelectContent>
             </Select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPaletteOpen(true)}
+              title="Command palette (Ctrl/Cmd + K)"
+              className="w-72 justify-start text-gray-500 dark:text-gray-400"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              Search commands...
+              <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
+                ⌘K
+              </kbd>
+            </Button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1223,6 +1423,9 @@ ${code.javascript}
                     value={code.html}
                     onChange={(value) => handleCodeChange("html", value)}
                     theme={theme}
+                    onEditorReady={(ed) => {
+                      activeEditorRef.current = ed
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="css" className="h-full m-0">
@@ -1231,6 +1434,9 @@ ${code.javascript}
                     value={code.css}
                     onChange={(value) => handleCodeChange("css", value)}
                     theme={theme}
+                    onEditorReady={(ed) => {
+                      activeEditorRef.current = ed
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="javascript" className="h-full m-0">
@@ -1239,6 +1445,9 @@ ${code.javascript}
                     value={code.javascript}
                     onChange={(value) => handleCodeChange("javascript", value)}
                     theme={theme}
+                    onEditorReady={(ed) => {
+                      activeEditorRef.current = ed
+                    }}
                   />
                 </TabsContent>
               </div>
@@ -1280,5 +1489,6 @@ ${code.javascript}
         )}
       </div>
     </div>
+    </>
   )
 }

@@ -38,9 +38,17 @@ interface MonacoEditorProps {
   value: string
   onChange: (value: string) => void
   theme?: "light" | "dark"
+  /** Receives the editor instance on mount, and `null` on unmount. */
+  onEditorReady?: (editor: monaco.editor.IStandaloneCodeEditor | null) => void
 }
 
-export default function MonacoEditor({ language, value, onChange, theme }: MonacoEditorProps) {
+export default function MonacoEditor({
+  language,
+  value,
+  onChange,
+  theme,
+  onEditorReady,
+}: MonacoEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const monacoRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
 
@@ -127,14 +135,18 @@ export default function MonacoEditor({ language, value, onChange, theme }: Monac
         // Prevent default save behavior
         console.log("Save shortcut pressed")
       })
+
+      onEditorReady?.(monacoRef.current)
     }
 
     return () => {
       if (monacoRef.current) {
+        onEditorReady?.(null)
         monacoRef.current.dispose()
         monacoRef.current = null
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Update editor value when prop changes
