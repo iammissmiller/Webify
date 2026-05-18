@@ -1,5 +1,12 @@
 "use client"
 
+//(after "use client", before imports)
+const safeBase64Encode = (str: string) =>
+  btoa(unescape(encodeURIComponent(str)));
+
+const safeBase64Decode = (str: string) =>
+  decodeURIComponent(escape(atob(str)));
+
 import type React from "react"
 
 import { useState, useEffect, useMemo, useRef } from "react"
@@ -942,7 +949,7 @@ export default function CodeEditor() {
     try {
       const urlParams = new URLSearchParams(window.location.search)
       const sharedCode = urlParams.get('code')
-      if (sharedCode) return JSON.parse(atob(sharedCode)) as CodeContent
+      if (sharedCode) return JSON.parse(safeBase64Decode(sharedCode)) as CodeContent
     } catch {
       // invalid share URL — fall through
     }
@@ -1130,7 +1137,7 @@ ${code.html}
 
     if (sharedCode) {
       try {
-        const decoded = JSON.parse(atob(sharedCode))
+        const decoded = JSON.parse(safeBase64Decode(sharedCode))
         setCode(decoded)
         toast("Shared code loaded", {
           description: "The shared code has been loaded successfully.",
@@ -1149,7 +1156,7 @@ ${code.html}
   const copyShareLink = async () => {
     if (typeof window === "undefined") return
     try {
-      const url = `${window.location.origin}?code=${btoa(
+      const url = `${window.location.origin}?code=${safeBase64Encode(
         JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }),
       )}`
       await navigator.clipboard.writeText(url)
@@ -1402,7 +1409,7 @@ ${code.html}
               <CopyButton
                 text={
                   typeof window !== "undefined"
-                    ? `${window.location.origin}?code=${btoa(
+                    ? `${window.location.origin}?code=${safeBase64Encode(
                       JSON.stringify({
                         html: code.html,
                         css: code.css,
@@ -1524,7 +1531,7 @@ ${code.html}
                   ref={previewRef}
                   className="w-full h-full border-0"
                   title="Live Preview"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
                 />
               </div>
             </div>
