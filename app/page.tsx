@@ -35,6 +35,7 @@ import { toast } from 'sonner'
 
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
+import Link from "next/link"
 // Monaco Editor must be loaded client-side only.
 // It directly accesses browser APIs (window, Worker) that don't exist in Node.
 // Removing `ssr: false` or moving this import to a Server Component will
@@ -966,7 +967,7 @@ export default function CodeEditor() {
   } | null>(null)
   const codeRef = useRef<CodeContent>(code)
   const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
-// Keep codeRef in sync so beforeunload always has the latest values
+  // Keep codeRef in sync so beforeunload always has the latest values
   useEffect(() => {
     codeRef.current = code
   }, [code])
@@ -1048,16 +1049,16 @@ export default function CodeEditor() {
 
   const loadTemplate = (template: Template) => {
     setCode(template.content)
-   toast("Template loaded", {
-  description: `${template.name} template has been loaded successfully.`,
-});
+    toast("Template loaded", {
+      description: `${template.name} template has been loaded successfully.`,
+    });
 
   }
 
 
   const downloadCode = async () => {
     const zip = new JSZip();
-    
+
     zip.file("index.html", `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1071,7 +1072,7 @@ ${code.html}
     <script src="script.js"></script>
 </body>
 </html>`);
-    
+
     zip.file("style.css", code.css);
     zip.file("script.js", code.javascript);
 
@@ -1112,8 +1113,8 @@ ${code.html}
           })
 
           toast("File imported", {
-  description: "HTML file has been imported successfully.",
-});
+            description: "HTML file has been imported successfully.",
+          });
 
         }
         reader.readAsText(file)
@@ -1131,15 +1132,15 @@ ${code.html}
       try {
         const decoded = JSON.parse(atob(sharedCode))
         setCode(decoded)
-       toast("Shared code loaded", {
-  description: "The shared code has been loaded successfully.",
-});
+        toast("Shared code loaded", {
+          description: "The shared code has been loaded successfully.",
+        });
 
       } catch (err) {
         console.error("Clipboard copy failed:", err);
         toast.error("Invalid share link", {
-  description: "Could not load shared code.",
-});
+          description: "Could not load shared code.",
+        });
 
       }
     }
@@ -1307,7 +1308,7 @@ ${code.html}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, activeTab, theme, isFullscreen, code])
 
-  
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -1322,214 +1323,214 @@ ${code.html}
 
   return (
     <>
-    <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
-    <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Code2 className="w-6 h-6 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Webify</h1>
-            </div>
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
+      <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                <Code2 className="w-6 h-6 text-blue-600" />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Webify</h1>
+              </Link>
 
-            <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Choose template" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    <div className="flex items-center gap-2">
-                      {template.icon}
-                      <div>
-                        <div className="font-medium">{template.name}</div>
-                        <div className="text-xs text-gray-500">{template.description}</div>
+              <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Choose template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      <div className="flex items-center gap-2">
+                        {template.icon}
+                        <div>
+                          <div className="font-medium">{template.name}</div>
+                          <div className="text-xs text-gray-500">{template.description}</div>
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPaletteOpen(true)}
-              title="Command palette (Ctrl/Cmd + K)"
-              className="w-72 justify-start text-gray-500 dark:text-gray-400"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              Search commands...
-              <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
-                ⌘K
-              </kbd>
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Layout Controls */}
-            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-              <Button variant={layout === "code" ? "default" : "ghost"} size="sm" onClick={() => setLayout("code")}>
-                <Code2 className="w-4 h-4" />
-              </Button>
-              <Button variant={layout === "split" ? "default" : "ghost"} size="sm" onClick={() => setLayout("split")}>
-                <Layout className="w-4 h-4" />
-              </Button>
               <Button
-                variant={layout === "preview" ? "default" : "ghost"}
+                variant="outline"
                 size="sm"
-                onClick={() => setLayout("preview")}
+                onClick={() => setPaletteOpen(true)}
+                title="Command palette (Ctrl/Cmd + K)"
+                className="w-72 justify-start text-gray-500 dark:text-gray-400"
               >
-                <Play className="w-4 h-4" />
+                <Search className="w-4 h-4 mr-2" />
+                Search commands...
+                <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
+                  ⌘K
+                </kbd>
               </Button>
             </div>
 
-            <Separator orientation="vertical" className="h-6" />
+            <div className="flex items-center gap-2">
+              {/* Layout Controls */}
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <Button variant={layout === "code" ? "default" : "ghost"} size="sm" onClick={() => setLayout("code")}>
+                  <Code2 className="w-4 h-4" />
+                </Button>
+                <Button variant={layout === "split" ? "default" : "ghost"} size="sm" onClick={() => setLayout("split")}>
+                  <Layout className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={layout === "preview" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setLayout("preview")}
+                >
+                  <Play className="w-4 h-4" />
+                </Button>
+              </div>
 
-            {/* Action Buttons */}
-            <Button variant="outline" size="sm" onClick={importCode}>
-              <Upload className="w-4 h-4 mr-2" />
-              Import
-            </Button>
+              <Separator orientation="vertical" className="h-6" />
 
-            <Button variant="outline" size="sm" onClick={downloadCode}>
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+              {/* Action Buttons */}
+              <Button variant="outline" size="sm" onClick={importCode}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
 
-            <CopyButton
-              text={
-                typeof window !== "undefined"
-                  ? `${window.location.origin}?code=${btoa(
+              <Button variant="outline" size="sm" onClick={downloadCode}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+
+              <CopyButton
+                text={
+                  typeof window !== "undefined"
+                    ? `${window.location.origin}?code=${btoa(
                       JSON.stringify({
                         html: code.html,
                         css: code.css,
                         javascript: code.javascript,
                       })
                     )}`
-                  : ""
+                    : ""
                 }
               />
 
-            <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)}>
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </Button>
+              <Button variant="outline" size="sm" onClick={() => setIsFullscreen(!isFullscreen)}>
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleTheme}
-              title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            >
-              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Code Editor */}
-        {(layout === "code" || layout === "split") && (
-          <div
-            className={`${layout === "split" ? "w-1/2" : "w-full"} flex flex-col border-r border-gray-200 dark:border-gray-700`}
-          >
-            <Tabs
-              value={activeTab}
-              onValueChange={(value) => setActiveTab(value as keyof CodeContent)}
-              className="flex-1 flex flex-col"
-            >
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="html" className="flex items-center gap-2 cursor-pointer">
-                    <FileText className="w-4 h-4" />
-                    HTML
-                  </TabsTrigger>
-                  <TabsTrigger value="css" className="flex items-center gap-2 cursor-pointer">
-                    <Palette className="w-4 h-4" />
-                    CSS
-                  </TabsTrigger>
-                  <TabsTrigger value="javascript" className="flex items-center gap-2 cursor-pointer">
-                    <Zap className="w-4 h-4" />
-                    JS
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <div className="flex-1">
-                <TabsContent value="html" className="h-full m-0">
-                  <MonacoEditor
-                    language="html"
-                    value={code.html}
-                    onChange={(value) => handleCodeChange("html", value)}
-                    theme={theme}
-                    onEditorReady={(ed) => {
-                      activeEditorRef.current = ed
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="css" className="h-full m-0">
-                  <MonacoEditor
-                    language="css"
-                    value={code.css}
-                    onChange={(value) => handleCodeChange("css", value)}
-                    theme={theme}
-                    onEditorReady={(ed) => {
-                      activeEditorRef.current = ed
-                    }}
-                  />
-                </TabsContent>
-                <TabsContent value="javascript" className="h-full m-0">
-                  <MonacoEditor
-                    language="javascript"
-                    value={code.javascript}
-                    onChange={(value) => handleCodeChange("javascript", value)}
-                    theme={theme}
-                    onEditorReady={(ed) => {
-                      activeEditorRef.current = ed
-                    }}
-                  />
-                </TabsContent>
-              </div>
-            </Tabs>
-          </div>
-        )}
-
-        {/* Preview */}
-        {(layout === "preview" || layout === "split") && (
-          <div className={`${layout === "split" ? "w-1/2" : "w-full"} flex flex-col`}>
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Play className="w-4 h-4 text-green-600" />
-                <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
-                {htmlValidation.isValid ? (
-                  <Badge variant="secondary" className="text-xs">
-                    Auto-refresh
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive" className="text-xs">
-                    HTML syntax error
-                  </Badge>
-                )}
-              </div>
-              <Button variant="outline" size="sm" onClick={() => window.open(previewRef.current?.src, "_blank")}>
-                <Maximize2 className="w-4 h-4 mr-2" />
-                Open in new tab
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              >
+                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
               </Button>
             </div>
-            <div className="flex-1 bg-white">
-              <iframe
-                ref={previewRef}
-                className="w-full h-full border-0"
-                title="Live Preview"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-              />
-            </div>
           </div>
-        )}
+        </header>
+
+        {/* Main Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Code Editor */}
+          {(layout === "code" || layout === "split") && (
+            <div
+              className={`${layout === "split" ? "w-1/2" : "w-full"} flex flex-col border-r border-gray-200 dark:border-gray-700`}
+            >
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as keyof CodeContent)}
+                className="flex-1 flex flex-col"
+              >
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="html" className="flex items-center gap-2 cursor-pointer">
+                      <FileText className="w-4 h-4" />
+                      HTML
+                    </TabsTrigger>
+                    <TabsTrigger value="css" className="flex items-center gap-2 cursor-pointer">
+                      <Palette className="w-4 h-4" />
+                      CSS
+                    </TabsTrigger>
+                    <TabsTrigger value="javascript" className="flex items-center gap-2 cursor-pointer">
+                      <Zap className="w-4 h-4" />
+                      JS
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <div className="flex-1">
+                  <TabsContent value="html" className="h-full m-0">
+                    <MonacoEditor
+                      language="html"
+                      value={code.html}
+                      onChange={(value) => handleCodeChange("html", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => {
+                        activeEditorRef.current = ed
+                      }}
+                    />
+                  </TabsContent>
+                  <TabsContent value="css" className="h-full m-0">
+                    <MonacoEditor
+                      language="css"
+                      value={code.css}
+                      onChange={(value) => handleCodeChange("css", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => {
+                        activeEditorRef.current = ed
+                      }}
+                    />
+                  </TabsContent>
+                  <TabsContent value="javascript" className="h-full m-0">
+                    <MonacoEditor
+                      language="javascript"
+                      value={code.javascript}
+                      onChange={(value) => handleCodeChange("javascript", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => {
+                        activeEditorRef.current = ed
+                      }}
+                    />
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          )}
+
+          {/* Preview */}
+          {(layout === "preview" || layout === "split") && (
+            <div className={`${layout === "split" ? "w-1/2" : "w-full"} flex flex-col`}>
+              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Play className="w-4 h-4 text-green-600" />
+                  <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
+                  {htmlValidation.isValid ? (
+                    <Badge variant="secondary" className="text-xs">
+                      Auto-refresh
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive" className="text-xs">
+                      HTML syntax error
+                    </Badge>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" onClick={() => window.open(previewRef.current?.src, "_blank")}>
+                  <Maximize2 className="w-4 h-4 mr-2" />
+                  Open in new tab
+                </Button>
+              </div>
+              <div className="flex-1 bg-white">
+                <iframe
+                  ref={previewRef}
+                  className="w-full h-full border-0"
+                  title="Live Preview"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   )
 }
