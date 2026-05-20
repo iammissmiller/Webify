@@ -52,7 +52,6 @@ export default function MonacoEditor({
   const editorRef = useRef<HTMLDivElement>(null)
   const monacoRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
   const statusRef = useRef<HTMLDivElement | null>(null)
-  const cursorPosRef = useRef<HTMLDivElement | null>(null)
   const charCountRef = useRef<HTMLDivElement | null>(null)
   const lineCountRef = useRef<HTMLDivElement | null>(null)
 
@@ -221,7 +220,7 @@ export default function MonacoEditor({
       if (statusRef.current) {
         statusRef.current.textContent = `${lines} lines`
       }
-    } catch (e) {
+    } catch {
       // swallow errors to avoid breaking editor
     }
   }
