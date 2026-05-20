@@ -1466,21 +1466,21 @@ ${code.html}
       <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Link href="/" className="flex items-center gap-2 cursor-pointer">
                 <Code2 className="w-6 h-6 text-blue-600" />
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Webify</h1>
               </Link>
 
               <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-36 sm:w-48">
                   <SelectValue placeholder="Choose template" />
                 </SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {template.icon}
                         <div>
                           <div className="font-medium">{template.name}</div>
@@ -1497,7 +1497,7 @@ ${code.html}
                 size="sm"
                 onClick={() => setPaletteOpen(true)}
                 title="Command palette (Ctrl/Cmd + K)"
-                className="w-72 justify-start text-gray-500 dark:text-gray-400"
+                className="hidden sm:flex w-72 justify-start text-gray-500 dark:text-gray-400"
               >
                 <Search className="w-4 h-4 mr-2" />
                 Search commands...
@@ -1507,7 +1507,7 @@ ${code.html}
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Layout Controls */}
               <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                 <Button variant={layout === "code" ? "default" : "ghost"} size="sm" onClick={() => setLayout("code")}>
@@ -1649,7 +1649,7 @@ style={{ minWidth: "8px" }}
       className="flex flex-col"
     >
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Play className="w-4 h-4 text-green-600" />
           <span className="font-medium text-gray-900 dark:text-white">
             Live Preview
