@@ -10,7 +10,7 @@ const safeBase64Decode = (str: string) =>
 
 import type React from "react"
 
-import { useState, useEffect, useMemo, useRef,useCallback } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -222,19 +222,174 @@ const templates: Template[] = [
             <div class="logo">Brand</div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
                 <li><a href="#about">About</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
     </header>
     
-    <main class="hero">
+    <main class="hero" id="home">
         <div class="hero-content">
             <h1 class="hero-title">Welcome to the Future</h1>
             <p class="hero-subtitle">Build amazing things with our platform</p>
             <button class="cta-button" onclick="handleCTA()">Get Started</button>
         </div>
     </main>
+
+    <section id="features" class="section features">
+        <div class="container">
+            <h2 class="section-title">Amazing Features</h2>
+            <p class="section-subtitle">Everything you need to build high-performance applications with ease</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <h3>Lightning Fast</h3>
+                    <p>Experience blazing-fast render times and optimized resource delivery for peak performance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <h3>Secure by Design</h3>
+                    <p>Your data is protected with end-to-end encryption, strict compliance, and active threat monitoring.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    </div>
+                    <h3>Advanced Analytics</h3>
+                    <p>Gain deeper insights into user engagement, system health, and growth metrics in real-time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section about">
+        <div class="container about-container">
+            <div class="about-content">
+                <h2 class="section-title text-center">About Our Platform</h2>
+                <p>We are dedicated to building a platform that empowers developers and creators. By focusing on cutting-edge technologies, we eliminate complex configurations so you can focus purely on what matters: your code.</p>
+                <p>Our platform handles scaling, global CDN edge caching, and automated builds, allowing you to deploy dynamic, beautiful web applications with just one click.</p>
+                <div class="about-points">
+                    <div class="about-point">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Collaborative developer workflows</span>
+                    </div>
+                    <div class="about-point">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Automatic scaling & edge routing</span>
+                    </div>
+                    <div class="about-point">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Integrated analytics and logging</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <section id="testimonials" class="section testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Users Say</h2>
+            <p class="section-subtitle">Join thousands of developers and teams already building the future on our platform</p>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Brand has completely transformed our workflow. The setup was instant, and the interface is incredibly smooth. Deploying landing pages takes seconds now!"</p>
+                    <div class="user-info">
+                        <div class="avatar">SC</div>
+                        <div>
+                            <h4>Sarah Connor</h4>
+                            <span>Lead Architect, TechCorp</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"The performance boost we saw after migrating to this platform was unbelievable. Plus, the built-in analytics are actually useful rather than bloated."</p>
+                    <div class="user-info">
+                        <div class="avatar">DM</div>
+                        <div>
+                            <h4>David Miller</h4>
+                            <span>Product Manager, Innovate</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Support is responsive, the documentation is clear, and the developer experience is unmatched. I can't recommend this platform enough."</p>
+                    <div class="user-info">
+                        <div class="avatar">ER</div>
+                        <div>
+                            <h4>Elena Rostova</h4>
+                            <span>CTO, FutureFlow</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">Brand</div>
+                <p>Building the future of web apps, one pixel at a time. Empowering developer teams globally.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                    </a>
+                    <a href="#" class="social-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                    <a href="#" class="social-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Community Forum</a></li>
+                    <li><a href="#">System Status</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Email: [EMAIL_ADDRESS]</li>
+                    <li>Phone: +91 [PHONE]</li>
+                    <li>Location: India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-container">
+                <p>&copy; 2026 Brand Inc. All rights reserved.</p>
+                <div class="footer-legal">
+                    <a href="#">Privacy Policy</a>
+                    <span>&middot;</span>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>`,
       css: `* {
@@ -249,8 +404,8 @@ body {
 }
 
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    background: #130a2e;
     padding: 1rem 0;
     position: fixed;
     width: 100%;
@@ -290,47 +445,385 @@ body {
 
 .hero {
     height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #130a2e;
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(102, 126, 234, 0.15), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(118, 75, 162, 0.15), transparent 25%);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: white;
+    position: relative;
+    overflow: hidden;
 }
 
 .hero-content {
     max-width: 600px;
     padding: 2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(to right, #ffffff, #c5bedb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     animation: fadeInUp 1s ease-out;
 }
 
 .hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    font-size: 1.25rem;
+    color: #c5bedb;
+    margin-bottom: 2.5rem;
     animation: fadeInUp 1s ease-out 0.2s both;
 }
 
 .cta-button {
-    background: white;
-    color: #667eea;
+    color: #130a2e;
+    font-weight: 700;
     border: none;
-    padding: 1rem 2rem;
+    padding: 1rem 2.5rem;
     font-size: 1.1rem;
     border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: all 0.3s ease;
     animation: fadeInUp 1s ease-out 0.4s both;
 }
 
 .cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 25px -5px rgba(102, 126, 234, 0.6);
+}
+
+.section {
+    padding: 6rem 2rem;
+    background: #130a2e;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    scroll-margin-top: 70px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.section-title.text-left {
+    text-align: left;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    text-align: center;
+    color: #c5bedb;
+    margin-bottom: 3.5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.features {
+    background: #130a2e;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+}
+
+.feature-card {
+    background: #21134a;
+    border: 1px solid #3c257d;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px -10px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+}
+
+.feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: rgba(102, 126, 234, 0.15);
+    color: #00f2fe;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    background: linear-gradient(135deg, #00f2fe 0%, #667eea 100%);
+    color: #130a2e;
+}
+
+.feature-card h3 {
+    font-size: 1.35rem;
+    margin-bottom: 0.75rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.feature-card p {
+    color: #c5bedb;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.about {
+    background: #170d37;
+}
+
+.about-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-content h2 {
+    margin-bottom: 1.5rem;
+}
+
+.about-content p {
+    color: #c5bedb;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.about-points {
+    margin-top: 2rem;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.about-point {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.check-icon {
+    color: #00f2fe;
+    flex-shrink: 0;
+}
+
+.about-point span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Cleaned up removed SVG wrapper classes */
+
+.testimonials {
+    background: #130a2e;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+}
+
+.testimonial-card {
+    background: #21134a;
+    border: 1px solid #3c257d;
+    border-radius: 20px;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+    box-shadow: 0 15px 35px -10px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+}
+
+.stars {
+    color: #f59e0b;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.testimonial-text {
+    font-size: 1rem;
+    color: #c5bedb;
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.user-info h4 {
+    font-size: 0.95rem;
+    color: #ffffff;
+    margin-bottom: 0.15rem;
+}
+
+.user-info span {
+    font-size: 0.8rem;
+    color: #c5bedb;
+}
+
+.footer {
+    background: #0b061d;
+    color: #a59ec0;
+    padding: 5rem 2rem 2rem;
+    border-top: 1px solid #21134a;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    gap: 4rem;
+    margin-bottom: 4rem;
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.footer-brand .logo {
+    color: white;
+}
+
+.footer-brand p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 320px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #21134a;
+    color: #a59ec0;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    background: linear-gradient(135deg, #00f2fe 0%, #667eea 100%);
+    color: #130a2e;
+    transform: translateY(-3px);
+}
+
+.footer-links h4 {
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.footer-links ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footer-links a {
+    color: #a59ec0;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+.footer-links li {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.footer-bottom {
+    border-top: 1px solid #21134a;
+    padding-top: 2rem;
+}
+
+.footer-bottom-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.footer-legal {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.footer-legal a {
+    color: #a59ec0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-legal a:hover {
+    color: white;
 }
 
 @keyframes fadeInUp {
@@ -342,7 +835,30 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}`,
+}
+
+@media (max-width: 968px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+/* About section media queries removed as it is now centered by default */
+    .section {
+        padding: 4rem 1.5rem;
+    }
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .footer-bottom-container {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+`,
       javascript: `function handleCTA() {
     alert('Welcome! This is where you would redirect to signup or more info.');
 }
@@ -365,14 +881,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add some interactive effects
-document.addEventListener('mousemove', function(e) {
-    const hero = document.querySelector('.hero');
-    const x = e.clientX / window.innerWidth;
-    const y = e.clientY / window.innerHeight;
-    
-    hero.style.background = \`linear-gradient(\${135 + x * 10}deg, #667eea 0%, #764ba2 100%)\`;
-});`,
+/* Interactive effects script removed */`,
     },
   },
   {
@@ -1030,6 +1539,7 @@ export default function CodeEditor() {
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [autoRun, setAutoRun] = useState(true)
+
   const [splitRatio, setSplitRatio] = useState(50)
   const isDragging = useRef(false)
   const [isResizing, setIsResizing] = useState(false)
@@ -1083,6 +1593,51 @@ const handleDragEnd = useCallback(() => {
   document.body.style.userSelect = "auto";
 }, []);
 
+  const [editorWidth, setEditorWidth] = useState(50)
+  // Tracks which template is currently active
+  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
+
+  // Per-template memory: stores the user's last-edited code for each template
+  const [templateSnapshots, setTemplateSnapshots] = useState<Record<string, CodeContent>>(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const saved = localStorage.getItem('webify_template_snapshots')
+      if (saved) return JSON.parse(saved) as Record<string, CodeContent>
+    } catch {
+      // corrupted storage — fall through
+    }
+    return {}
+  })
+  const isDragging = useRef(false)
+  const [isResizing, setIsResizing] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLIFrameElement>(null)
+
+  const handleMouseDown = () => {
+    isDragging.current = true;
+    setIsResizing(true);
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  };
+
+  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
+    if (!isDragging.current || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const newWidth = ((e.clientX - rect.left) / rect.width) * 100;
+
+    const clampedWidth = Math.max(20, Math.min(80, newWidth));
+    setEditorWidth(clampedWidth);
+  }, [setEditorWidth]);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+    setIsResizing(false);
+    document.body.style.userSelect = "auto";
+    document.body.style.cursor = "default";
+  }, []);
+
+
 useEffect(() => {
   window.addEventListener("mousemove", handleMouseMove);
   window.addEventListener("mouseup", handleDragEnd);
@@ -1107,6 +1662,7 @@ useEffect(() => {
   useEffect(() => {
     codeRef.current = code
   }, [code])
+
 useEffect(() => {
   window.addEventListener("mousemove", handleMouseMove);
   window.addEventListener("mouseup", handleDragEnd);
@@ -1116,6 +1672,17 @@ useEffect(() => {
     window.removeEventListener("mouseup", handleDragEnd);
   };
 }, [handleMouseMove, handleDragEnd]);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
   // Auto-save code to localStorage, debounced 500ms
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1128,6 +1695,17 @@ useEffect(() => {
     }, 500)
     return () => clearTimeout(timer)
   }, [code])
+  // Auto-save per-template snapshots to localStorage, debounced 500ms
+useEffect(() => {
+  const timer = setTimeout(() => {
+    try {
+      localStorage.setItem('webify_template_snapshots', JSON.stringify(templateSnapshots))
+    } catch (err) {
+      console.warn('Webify: template snapshot save failed', err)
+    }
+  }, 500)
+  return () => clearTimeout(timer)
+}, [templateSnapshots])
 
   // empty deps — registers once, codeRef keeps values fresh
   // Initialize theme from storage/preferences on mount
@@ -1176,11 +1754,29 @@ useEffect(() => {
       </head>
       <body>
         ${code.html}
-        <script>${code.javascript}</script>
+        <script>
+          (function() {
+            var _killTimer = setTimeout(function() {
+              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+            }, 5000);
+            try {
+              ${code.javascript}
+            } catch(e) {
+              clearTimeout(_killTimer);
+              var el = document.createElement('div');
+              el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
+              el.textContent = '⚠️ JS Error: ' + e.message;
+              document.body.appendChild(el);
+              return;
+            }
+            clearTimeout(_killTimer);
+          })();
+        <\/script>
       </body>
       </html>
     `
-
+        
+    
     const blob = new Blob([combinedCode], { type: "text/html" })
     const url = URL.createObjectURL(blob)
     previewRef.current.src = url
@@ -1188,17 +1784,17 @@ useEffect(() => {
     return () => URL.revokeObjectURL(url)
   }, [code, htmlValidation, autoRun])
 
-const runCodeManually = () => {
-  if (!previewRef.current) return
+  const runCodeManually = () => {
+    if (!previewRef.current) return
 
-  if (!htmlValidation.isValid) {
-    previewRef.current.srcdoc = createPreviewErrorHtml(
-      htmlValidation.message ?? "Invalid HTML syntax."
-    )
-    return
-  }
+    if (!htmlValidation.isValid) {
+      previewRef.current.srcdoc = createPreviewErrorHtml(
+        htmlValidation.message ?? "Invalid HTML syntax."
+      )
+      return
+    }
 
-  const combinedCode = `
+    const combinedCode = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -1209,27 +1805,53 @@ const runCodeManually = () => {
     </head>
     <body>
       ${code.html}
-      <script>${code.javascript}</script>
+      <script>
+        (function() {
+          var _killTimer = setTimeout(function() {
+            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+          }, 5000);
+          try {
+            ${code.javascript}
+          } catch(e) {
+            clearTimeout(_killTimer);
+            var el = document.createElement('div');
+            el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
+            el.textContent = '⚠️ JS Error: ' + e.message;
+            document.body.appendChild(el);
+            return;
+          }
+          clearTimeout(_killTimer);
+        })();
+      <\/script>
     </body>
     </html>
   `
 
-  const blob = new Blob([combinedCode], { type: "text/html" })
-  const url = URL.createObjectURL(blob)
-  previewRef.current.src = url
-}
+    const blob = new Blob([combinedCode], { type: "text/html" })
+    const url = URL.createObjectURL(blob)
+    previewRef.current.src = url
+  }
 
   const handleCodeChange = (language: keyof CodeContent, value: string) => {
     setCode((prev) => ({ ...prev, [language]: value }))
   }
 
-  const loadTemplate = (template: Template) => {
-    setCode(template.content)
-    toast("Template loaded", {
-      description: `${template.name} template has been loaded successfully.`,
-    });
-
+  // AFTER
+const loadTemplate = (template: Template) => {
+  // Save the current template's edits before switching away
+  if (currentTemplateId) {
+    setTemplateSnapshots(prev => ({ ...prev, [currentTemplateId]: code }))
   }
+
+  // Restore the user's last edits for this template, or fall back to its default content
+  const savedSnapshot = templateSnapshots[template.id]
+  setCode(savedSnapshot ?? template.content)
+  setCurrentTemplateId(template.id)
+
+  toast("Template loaded", {
+    description: `${template.name} template has been loaded successfully.`,
+  })
+}
 
 
   const downloadCode = async () => {
@@ -1503,17 +2125,21 @@ ${code.html}
       <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
+         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 w-full">
+           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               <Link href="/" className="flex items-center gap-2 cursor-pointer">
                 <Code2 className="w-6 h-6 text-blue-600" />
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Webify</h1>
               </Link>
 
               <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-                <SelectTrigger className="w-36 sm:w-48">
-                  <SelectValue placeholder="Choose template" />
-                </SelectTrigger>
+           <SelectTrigger className="w-[200px] sm:w-[210px] md:w-[240px] max-w-full min-w-0 overflow-hidden">
+ <div className="flex items-center overflow-hidden min-w-0 w-full">
+  <span className="truncate block w-full">
+    <SelectValue placeholder="Choose template" />
+  </span>
+</div>
+</SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
@@ -1607,9 +2233,133 @@ ${code.html}
 
         {/* Main Content */}
 
-       <div
+
+        <div
+          ref={containerRef}
+          className="flex-1 flex overflow-hidden"
+
+        >
+
+          {/* CODE EDITOR */}
+          {(layout === "code" || layout === "split") && (
+            <div
+              style={{ width: layout === "split" ? `${editorWidth}%` : "100%" }}
+              className="flex flex-col border-r border-gray-200 dark:border-gray-700"
+            >
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as keyof CodeContent)}
+                className="flex-1 flex flex-col"
+              >
+                {/* Tabs Header */}
+                <div className="bg-white dark:bg-gray-800 border-b px-4">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="html">HTML</TabsTrigger>
+                    <TabsTrigger value="css">CSS</TabsTrigger>
+                    <TabsTrigger value="javascript">JS</TabsTrigger>
+                  </TabsList>
+                </div>
+
+                {/* Tabs Content */}
+                <div className="flex-1">
+                  <TabsContent value="html" className="h-full m-0">
+                    <MonacoEditor
+                      language="html"
+                      value={code.html}
+                      onChange={(value) => handleCodeChange("html", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => (activeEditorRef.current = ed)}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="css" className="h-full m-0">
+                    <MonacoEditor
+                      language="css"
+                      value={code.css}
+                      onChange={(value) => handleCodeChange("css", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => (activeEditorRef.current = ed)}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="javascript" className="h-full m-0">
+                    <MonacoEditor
+                      language="javascript"
+                      value={code.javascript}
+                      onChange={(value) => handleCodeChange("javascript", value)}
+                      theme={theme}
+                      onEditorReady={(ed) => (activeEditorRef.current = ed)}
+                    />
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          )}
+
+          {/* 🔥 RESIZE DIVIDER */}
+          {layout === "split" && (
+            <div
+              onMouseDown={handleMouseDown}
+              onDragStart={(e) => e.preventDefault()}
+              className="w-2 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition"
+              style={{ minWidth: "8px" }}
+            />
+          )}
+
+          {/* PREVIEW */}
+          {(layout === "preview" || layout === "split") && (
+            <div
+              style={{ width: layout === "split" ? `${100 - editorWidth}%` : "100%" }}
+              className="flex flex-col"
+            >
+              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Play className="w-4 h-4 text-green-600" />
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    Live Preview
+                  </span>
+
+                  <Badge variant="secondary" className="text-xs">
+                    {autoRun ? "Auto-refresh" : "Manual"}
+                  </Badge>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAutoRun(!autoRun)}
+                  >
+                    {autoRun ? "Pause" : "Resume"}
+                  </Button>
+
+                  {!autoRun && (
+                    <Button size="sm" onClick={runCodeManually}>
+                      Run
+                    </Button>
+                  )}
+
+                </div>
+              </div>
+
+              <div className={`flex-1 bg-white ${isResizing ? "pointer-events-none" : ""}`}>
+                <iframe
+                  ref={previewRef}
+                  className={`w-full h-full border-0 ${isResizing ? "pointer-events-none" : ""}`}
+                  title="Live Preview"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                />
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </>
+  )
+}
+
+    <div
   ref={containerRef}
-  className="flex-1 flex flex-col md:flex-row overflow-hidden relative" 
+w overflow-hidden relative" 
 >
 
 {/* CODE EDITOR */}
@@ -1676,8 +2426,85 @@ ${code.html}
   </div>
 )}
 
-  {/* 🔥 RESIZE DIVIDER */}
+  className="flex-1 flex flex-col lg:flex-row overflow-hidden"
+>
+
+  {/* CODE EDITOR */}
+  {(layout === "code" || layout === "split") && (
+    <div
+      className={`flex flex-col border-gray-200 dark:border-gray-700
+      min-h-[50vh] lg:min-h-0 w-full overflow-hidden ${
+        layout === "split" ? "lg:w-1/2 lg:border-r" : "w-full"
+      }`}
+    >
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(value as keyof CodeContent)
+        }
+        className="flex-1 flex flex-col overflow-hidden"
+      >
+
+        {/* Tabs Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="html">HTML</TabsTrigger>
+            <TabsTrigger value="css">CSS</TabsTrigger>
+            <TabsTrigger value="javascript">JS</TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* Tabs Content */}
+        <div className="flex-1 overflow-hidden">
+          <TabsContent value="html" className="h-full m-0">
+            <MonacoEditor
+              language="html"
+              value={code.html}
+              onChange={(value) =>
+                handleCodeChange("html", value)
+              }
+              theme={theme}
+              onEditorReady={(ed) =>
+                (activeEditorRef.current = ed)
+              }
+            />
+          </TabsContent>
+
+          <TabsContent value="css" className="h-full m-0">
+            <MonacoEditor
+              language="css"
+              value={code.css}
+              onChange={(value) =>
+                handleCodeChange("css", value)
+              }
+              theme={theme}
+              onEditorReady={(ed) =>
+                (activeEditorRef.current = ed)
+              }
+            />
+          </TabsContent>
+
+          <TabsContent value="javascript" className="h-full m-0">
+            <MonacoEditor
+              language="javascript"
+              value={code.javascript}
+              onChange={(value) =>
+                handleCodeChange("javascript", value)
+              }
+              theme={theme}
+              onEditorReady={(ed) =>
+                (activeEditorRef.current = ed)
+              }
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
+  )}
+
+  {/* RESIZER - DESKTOP ONLY */}
   {layout === "split" && (
+
    <div
   onMouseDown={handleDragStart}
   onTouchStart={handleDragStart}
@@ -1691,11 +2518,20 @@ ${code.html}
   </div>
      </div>
           
+
+    <div
+      onMouseDown={handleMouseDown}
+      onDragStart={(e) => e.preventDefault()}
+      className="hidden lg:block w-2 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition"
+      style={{ minWidth: "8px" }}
+    />
+
   )}
 
-  {/* PREVIEW */}
+  {/* PREVIEW PANEL */}
   {(layout === "preview" || layout === "split") && (
     <div
+
       style={layout === "split"
         ? { 
           width: isMobile ? "100%" : `${100 - splitRatio}%`,
@@ -1708,6 +2544,20 @@ ${code.html}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between overflow-x-auto scrollbar-hide shrink-0">
         <div className="flex  items-center gap-2 min-w-max">
           <Play className="w-4 h-4 text-green-600 shrink-0" />
+
+      className={`flex flex-col bg-white dark:bg-gray-900
+      min-h-[50vh] lg:min-h-0 w-full overflow-hidden ${
+        layout === "split" ? "lg:w-1/2" : "w-full"
+      }`}
+    >
+
+      {/* Preview Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Play className="w-4 h-4 text-green-600" />
+
+
           <span className="font-medium text-gray-900 dark:text-white">
             Live Preview
           </span>
@@ -1730,16 +2580,29 @@ ${code.html}
               Run
             </Button>
           )}
-
         </div>
       </div>
+
 
       <div className={`flex-1 bg-white relative ${isResizing ? "pointer-events-none select-none" : ""}`}>
         <iframe
           ref={previewRef}
           className="absolute inset-0 w-full h-full border-0"
+
+      {/* Preview Iframe */}
+      <div
+        className={`flex-1 min-h-[50vh] lg:min-h-0 bg-white dark:bg-gray-900 ${
+          isResizing ? "pointer-events-none" : ""
+        }`}
+      >
+        <iframe
+          ref={previewRef}
+          className={`w-full h-full border-0 ${
+            isResizing ? "pointer-events-none" : ""
+          }`}
+
           title="Live Preview"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          sandbox="allow-scripts allow-forms allow-popups allow-modals"
         />
       </div>
       {isResizing && (
@@ -1747,9 +2610,8 @@ ${code.html}
               )}
     </div>
   )}
-
 </div>
-      </div>
-    </>
-  )
-}
+</div>
+</>
+  )}
+

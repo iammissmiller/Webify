@@ -1,6 +1,13 @@
 {
   "name": "webify",
   "version": "0.1.0",
+  "description": "A lightweight browser-based IDE for HTML, CSS, and JavaScript with live preview.",
+  "keywords": ["code-editor", "html", "css", "javascript", "live-preview", "monaco-editor", "nextjs", "react"],
+  "homepage": "https://webify-five.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Debmallya-03/Webify.git"
+  },
   "private": true,
   "engines": {
     "node": ">=18.18.0"
