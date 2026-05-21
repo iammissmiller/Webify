@@ -1648,11 +1648,29 @@ export default function CodeEditor() {
       </head>
       <body>
         ${code.html}
-        <script>${code.javascript}</script>
+        <script>
+          (function() {
+            var _killTimer = setTimeout(function() {
+              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+            }, 5000);
+            try {
+              ${code.javascript}
+            } catch(e) {
+              clearTimeout(_killTimer);
+              var el = document.createElement('div');
+              el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
+              el.textContent = '⚠️ JS Error: ' + e.message;
+              document.body.appendChild(el);
+              return;
+            }
+            clearTimeout(_killTimer);
+          })();
+        <\/script>
       </body>
       </html>
     `
-
+        
+    
     const blob = new Blob([combinedCode], { type: "text/html" })
     const url = URL.createObjectURL(blob)
     previewRef.current.src = url
@@ -1681,7 +1699,24 @@ export default function CodeEditor() {
     </head>
     <body>
       ${code.html}
-      <script>${code.javascript}</script>
+      <script>
+        (function() {
+          var _killTimer = setTimeout(function() {
+            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+          }, 5000);
+          try {
+            ${code.javascript}
+          } catch(e) {
+            clearTimeout(_killTimer);
+            var el = document.createElement('div');
+            el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
+            el.textContent = '⚠️ JS Error: ' + e.message;
+            document.body.appendChild(el);
+            return;
+          }
+          clearTimeout(_killTimer);
+        })();
+      <\/script>
     </body>
     </html>
   `
@@ -2346,7 +2381,7 @@ ${code.html}
             isResizing ? "pointer-events-none" : ""
           }`}
           title="Live Preview"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          sandbox="allow-scripts allow-forms allow-popups allow-modals"
         />
       </div>
     </div>
