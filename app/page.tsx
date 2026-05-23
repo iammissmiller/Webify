@@ -45,11 +45,16 @@ import { toast } from 'sonner'
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
 import Link from "next/link"
+import {
+  EditorErrorBoundary,
+  PreviewErrorBoundary,
+  AppErrorBoundary,
+} from "./components/error-boundary"
+
 // Monaco Editor must be loaded client-side only.
 // It directly accesses browser APIs (window, Worker) that don't exist in Node.
 // Removing `ssr: false` or moving this import to a Server Component will
 // cause a hydration crash. Keep this dynamic import exactly as-is.
-// Dynamically import Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,
   loading: () => (
@@ -1573,7 +1578,8 @@ export default function CodeEditor() {
 
 const containerRef = useRef<HTMLDivElement>(null)
 const previewRef = useRef<HTMLIFrameElement>(null)
-const activeEditorRef = useRef<any>(null)
+// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
+const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
 const handleDragStart = () => {
   isDragging.current = true;
   setIsResizing(true);
@@ -2097,6 +2103,7 @@ ${code.html}
   }, [])
 
   return (
+    <AppErrorBoundary>
     <>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
       <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
@@ -2215,6 +2222,7 @@ ${code.html}
         >
           {/* CODE EDITOR */}
           {(layout === "code" || layout === "split") && (
+  <EditorErrorBoundary>
   <div
   style={
     layout === "split"
@@ -2275,6 +2283,7 @@ ${code.html}
       </div>
     </Tabs>
   </div>
+  </EditorErrorBoundary>
 )}
 
           {/* RESIZER - DESKTOP ONLY */}
@@ -2289,6 +2298,7 @@ ${code.html}
 
           {/* PREVIEW PANEL */}
           {(layout === "preview" || layout === "split") && (
+            <PreviewErrorBoundary>
             <div
               style={
                 layout === "split" && !isMobile
@@ -2338,11 +2348,13 @@ ${code.html}
                 )}
               </div>
             </div>
+            </PreviewErrorBoundary>
           )}
         </div>
 
 
       </div>
     </>
+    </AppErrorBoundary>
   )
 }
