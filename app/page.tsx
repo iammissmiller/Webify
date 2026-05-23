@@ -1543,14 +1543,6 @@ export default function CodeEditor() {
   const [splitRatio, setSplitRatio] = useState(50)
   const isDragging = useRef(false)
   const [isResizing, setIsResizing] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize() // Set initial value
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   // use effect for handling full screen mode
   useEffect(() => {
@@ -2147,11 +2139,11 @@ ${code.html}
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {template.icon}
-                        <div>
-                          <div className="font-medium">{template.name}</div>
-                          <div className="text-xs text-gray-500">{template.description}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="shrink-0">{template.icon}</span>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{template.name}</div>
+                          <div className="text-xs text-gray-500 truncate">{template.description}</div>
                         </div>
                       </div>
                     </SelectItem>
@@ -2246,6 +2238,7 @@ ${code.html}
           {(layout === "code" || layout === "split") && (
             <div
 
+
               style={
                 layout === "split"
                   ? {
@@ -2255,6 +2248,7 @@ ${code.html}
                   : { height: "100%", width: "100%" }
               }
               className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
+
 
               style={{ width: layout === "split" ? `${splitRatio}%` : "100%" }}
               className="flex flex-col border-r border-gray-200 dark:border-gray-700"
@@ -2330,6 +2324,7 @@ ${code.html}
           {(layout === "preview" || layout === "split") && (
             <div
 
+
               style={layout === "split"
                 ? {
                   width: isMobile ? "100%" : `${100 - splitRatio}%`,
@@ -2338,6 +2333,7 @@ ${code.html}
                 : { height: "100%", width: "100%" }
               }
               className="flex flex-col shrink-0 relative transition-none"
+
 
               style={{ width: layout === "split" ? `${100 - splitRatio}%` : "100%" }}
               className="flex flex-col"
@@ -2386,6 +2382,7 @@ ${code.html}
           )}
 
         </div>
+
 
 
         {/* Main Container - Code Editor + Preview */}
@@ -2520,6 +2517,7 @@ ${code.html}
             </div>
           )}
         </div>
+
 
       </div>
     </>
