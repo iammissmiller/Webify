@@ -1757,6 +1757,15 @@ useEffect(() => {
             }, 5000);
             try {
               ${code.javascript}
+              if (typeof startStop === 'function') window.startStop = startStop;
+              if (typeof reset === 'function') window.reset = reset;
+              if (typeof handleCTA === 'function') window.handleCTA = handleCTA;
+              if (typeof handleAction === 'function') window.handleAction = handleAction;
+              if (typeof addTodo === 'function') window.addTodo = addTodo;
+              if (typeof deleteTodo === 'function') window.deleteTodo = deleteTodo;
+              if (typeof toggleTodo === 'function') window.toggleTodo = toggleTodo;
+              if (typeof filterTodos === 'function') window.filterTodos = filterTodos;
+              if (typeof clearCompleted === 'function') window.clearCompleted = clearCompleted;
             } catch(e) {
               clearTimeout(_killTimer);
               var el = document.createElement('div');
@@ -1808,6 +1817,15 @@ useEffect(() => {
           }, 5000);
           try {
             ${code.javascript}
+            if (typeof startStop === 'function') window.startStop = startStop;
+            if (typeof reset === 'function') window.reset = reset;
+            if (typeof handleCTA === 'function') window.handleCTA = handleCTA;
+            if (typeof handleAction === 'function') window.handleAction = handleAction;
+            if (typeof addTodo === 'function') window.addTodo = addTodo;
+            if (typeof deleteTodo === 'function') window.deleteTodo = deleteTodo;
+            if (typeof toggleTodo === 'function') window.toggleTodo = toggleTodo;
+            if (typeof filterTodos === 'function') window.filterTodos = filterTodos;
+            if (typeof clearCompleted === 'function') window.clearCompleted = clearCompleted;
           } catch(e) {
             clearTimeout(_killTimer);
             var el = document.createElement('div');
