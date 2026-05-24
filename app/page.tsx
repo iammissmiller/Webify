@@ -1210,12 +1210,29 @@ export default function CodeEditor() {
 const containerRef = useRef<HTMLDivElement>(null)
 const previewRef = useRef<HTMLIFrameElement>(null)
 
+const [isMobile, setIsMobile] = useState(false)
+
+useEffect(() => {
+  const updateIsMobile = () => {
+    setIsMobile(window.innerWidth < 768)
+  }
+
+  updateIsMobile()
+  window.addEventListener("resize", updateIsMobile)
+
+  return () => {
+    window.removeEventListener("resize", updateIsMobile)
+  }
+}, [])
+
+
 // Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
 const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
 
 
 // Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
 const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
+
 
 
 const handleDragStart = () => {
@@ -1228,7 +1245,6 @@ const handleDragMove = useCallback((clientX: number, clientY: number) => {
   if (!isDragging.current || !containerRef.current) return;
 
   const rect = containerRef.current.getBoundingClientRect();
-  const isMobile = window.innerWidth < 768; // Tailwind 'md' breakpoint
 
   let newRatio;
   if (isMobile) {
@@ -1239,7 +1255,7 @@ const handleDragMove = useCallback((clientX: number, clientY: number) => {
 
   const clampedRatio = Math.max(20, Math.min(80, newRatio));
   setSplitRatio(clampedRatio);
-}, []);
+}, [isMobile]);
 
 const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
   handleDragMove(e.clientX, e.clientY);
@@ -2061,15 +2077,29 @@ useEffect(() => {
         >
           {/* Code panel */}
           {(layout === "code" || layout === "split") && (
+          
             <div
               style={
+                
                 layout === "split"
+
+                  ? {
+                    
+                    width: isMobile ? "100%" : `${splitRatio}%`,
+                    height: isMobile ? `${splitRatio}%` : "100%",
+                  }
+                  : { height: "100%", width: "100%" }
+              }
+              className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
+
+
                   ? isMobile
                     ? { height: `${splitRatio}%` }
                     : { width: `${splitRatio}%` }
                   : { flex: 1 }
               }
               className={`flex flex-col overflow-hidden shrink-0 ${!isMobile && layout === "split" ? "border-r border-gray-200 dark:border-gray-700" : ""}`}
+
             >
               {EditorPanel}
             </div>
@@ -2081,6 +2111,74 @@ useEffect(() => {
               onMouseDown={() => { handleDragStart(); document.body.style.cursor = isMobile ? "row-resize" : "col-resize" }}
               onTouchStart={handleDragStart}
               onDragStart={(e) => e.preventDefault()}
+
+              className="w-full h-3 md:w-2 md:h-full cursor-row-resize md:cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10 flex items-center justify-center touch-none"
+            >
+              <div className="flex md:flex-col gap-1">
+                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
+                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
+                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
+              </div>
+            </div>
+          )}
+
+          {/* PREVIEW */}
+          {(layout === "preview" || layout === "split") && (
+            <div
+              style={layout === "split"
+                ? {
+                  width: isMobile ? "100%" : `${100 - splitRatio}%`,
+                  height: isMobile ? `${100 - splitRatio}%` : "100%",
+                }
+                : { height: "100%", width: "100%" }
+              }
+              className="flex flex-col shrink-0 relative transition-none"
+
+            >
+              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between overflow-x-auto scrollbar-hide shrink-0">
+                <div className="flex items-center gap-2 min-w-max">
+                  <Play className="w-4 h-4 text-green-600 shrink-0" />
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    Live Preview
+                  </span>
+
+                  <Badge variant="secondary" className="text-xs shrink-0">
+                    {autoRun ? "Auto-refresh" : "Manual"}
+                  </Badge>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAutoRun(!autoRun)}
+                    className="shrink-0"
+                  >
+                    {autoRun ? "Pause" : "Resume"}
+                  </Button>
+
+                  {!autoRun && (
+                    <Button size="sm" onClick={runCodeManually} className="shrink-0">
+                      Run
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className={`flex-1 bg-white relative ${isResizing ? "pointer-events-none select-none" : ""}`}>
+                <iframe
+                  ref={previewRef}
+                  className="absolute inset-0 w-full h-full border-0"
+                  title="Live Preview"
+                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
+                />
+              </div>
+              {isResizing && (
+                <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize"></div>
+              )}
+            </div>
+          )}
+
+        </div>
+
               className={`shrink-0 z-10 transition-colors ${
                 isMobile
                   ? "h-2 w-full cursor-row-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
@@ -2296,6 +2394,7 @@ useEffect(() => {
             ))}
           </div>
         </nav>
+
 
       </div>
     </>
