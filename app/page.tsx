@@ -14,54 +14,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { CopyButton } from "@/components/ui/copy-button"
 import { CommandPalette, type Command } from "@/components/ui/command-palette"
-
 import {
-  Code2,
-  Play,
-  Download,
-  Upload,
-  Layout,
-  Maximize2,
-  Minimize2,
-  FileText,
-  Palette,
-  Zap,
-  Sun,
-  Moon,
-  Search,
-  Link as LinkIcon,
-  Undo2,
-  Redo2,
-  Timer,
-  MoreHorizontal,
-  X,
+  Code2, Play, Download, Upload, Layout, Maximize2, Minimize2,
+  FileText, Palette, Zap, Sun, Moon, Search, Link as LinkIcon,
+  Undo2, Redo2, Timer, MoreHorizontal, X,
 } from "lucide-react"
-
 import { toast } from "sonner"
-
-import { toast } from 'sonner'
 import * as prettier from 'prettier'
 import parserHtml from 'prettier/plugins/html'
 import parserCss from 'prettier/plugins/postcss'
 import parserBabel from 'prettier/plugins/babel'
 import parserEstree from 'prettier/plugins/estree'
-
-
-
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-
 import {
   EditorErrorBoundary,
   PreviewErrorBoundary,
   AppErrorBoundary,
 } from "./components/error-boundary"
-
-// Monaco Editor must be loaded client-side only.
-// It directly accesses browser APIs (window, Worker) that don't exist in Node.
-// Removing `ssr: false` or moving this import to a Server Component will
-// cause a hydration crash. Keep this dynamic import exactly as-is.
+import AIAssistant from "./components/AIAssistant"
 
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,
@@ -144,933 +116,9 @@ const templates: Template[] = [
     description: "Modern landing page template",
     icon: <Layout className="w-4 h-4" />,
     content: {
-
-      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Landing Page</title></head><body><header class="header"><nav class="nav"><div class="logo">Brand</div></nav></header><main class="hero"><div class="hero-content"><h1>Welcome</h1><p>Build amazing things</p><button onclick="alert('Hello!')">Get Started</button></div></main></body></html>`,
+      html: `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Landing Page</title>\n</head>\n<body>\n    <header class="header"><nav class="nav"><div class="logo">Brand</div></nav></header>\n    <main class="hero"><div class="hero-content"><h1>Welcome to the Future</h1><p>Build amazing things</p><button onclick="alert('Hello!')">Get Started</button></div></main>\n</body>\n</html>`,
       css: `body{margin:0;font-family:'Segoe UI',sans-serif}.header{background:#130a2e;padding:1rem 2rem;position:fixed;width:100%;top:0;z-index:1000}.nav{display:flex;justify-content:space-between;align-items:center}.logo{color:white;font-size:1.5rem;font-weight:bold}.hero{height:100vh;background:#130a2e;display:flex;align-items:center;justify-content:center;text-align:center;color:white}.hero-content h1{font-size:4rem;margin-bottom:1rem}.hero-content p{color:#c5bedb;margin-bottom:2rem}.hero-content button{padding:1rem 2.5rem;border:none;border-radius:50px;cursor:pointer;font-weight:700;font-size:1.1rem}`,
       javascript: `console.log('Landing page loaded!')`,
-
-      html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Landing Page</title>
-</head>
-<body>
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">Brand</div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main class="hero" id="home">
-        <div class="hero-content">
-            <h1 class="hero-title">Welcome to the Future</h1>
-            <p class="hero-subtitle">Build amazing things with our platform</p>
-            <button class="cta-button" onclick="handleCTA()">Get Started</button>
-        </div>
-    </main>
-
-    <section id="features" class="section features">
-        <div class="container">
-            <h2 class="section-title">Amazing Features</h2>
-            <p class="section-subtitle">Everything you need to build high-performance applications with ease</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                    </div>
-                    <h3>Lightning Fast</h3>
-                    <p>Experience blazing-fast render times and optimized resource delivery for peak performance.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <h3>Secure by Design</h3>
-                    <p>Your data is protected with end-to-end encryption, strict compliance, and active threat monitoring.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    </div>
-                    <h3>Advanced Analytics</h3>
-                    <p>Gain deeper insights into user engagement, system health, and growth metrics in real-time.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="about" class="section about">
-        <div class="container about-container">
-            <div class="about-content">
-                <h2 class="section-title text-center">About Our Platform</h2>
-                <p>We are dedicated to building a platform that empowers developers and creators. By focusing on cutting-edge technologies, we eliminate complex configurations so you can focus purely on what matters: your code.</p>
-                <p>Our platform handles scaling, global CDN edge caching, and automated builds, allowing you to deploy dynamic, beautiful web applications with just one click.</p>
-                <div class="about-points">
-                    <div class="about-point">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Collaborative developer workflows</span>
-                    </div>
-                    <div class="about-point">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Automatic scaling & edge routing</span>
-                    </div>
-                    <div class="about-point">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="check-icon"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Integrated analytics and logging</span>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-    </section>
-
-    <section id="testimonials" class="section testimonials">
-        <div class="container">
-            <h2 class="section-title">What Our Users Say</h2>
-            <p class="section-subtitle">Join thousands of developers and teams already building the future on our platform</p>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
-                    <p class="testimonial-text">"Brand has completely transformed our workflow. The setup was instant, and the interface is incredibly smooth. Deploying landing pages takes seconds now!"</p>
-                    <div class="user-info">
-                        <div class="avatar">SC</div>
-                        <div>
-                            <h4>Sarah Connor</h4>
-                            <span>Lead Architect, TechCorp</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
-                    <p class="testimonial-text">"The performance boost we saw after migrating to this platform was unbelievable. Plus, the built-in analytics are actually useful rather than bloated."</p>
-                    <div class="user-info">
-                        <div class="avatar">DM</div>
-                        <div>
-                            <h4>David Miller</h4>
-                            <span>Product Manager, Innovate</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
-                    <p class="testimonial-text">"Support is responsive, the documentation is clear, and the developer experience is unmatched. I can't recommend this platform enough."</p>
-                    <div class="user-info">
-                        <div class="avatar">ER</div>
-                        <div>
-                            <h4>Elena Rostova</h4>
-                            <span>CTO, FutureFlow</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer id="contact" class="footer">
-        <div class="container footer-container">
-            <div class="footer-brand">
-                <div class="logo">Brand</div>
-                <p>Building the future of web apps, one pixel at a time. Empowering developer teams globally.</p>
-                <div class="social-icons">
-                    <a href="#" class="social-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-                    </a>
-                    <a href="#" class="social-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                    </a>
-                    <a href="#" class="social-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                    </a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <h4>Navigation</h4>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Community Forum</a></li>
-                    <li><a href="#">System Status</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Contact</h4>
-                <ul>
-                    <li>Email: [EMAIL_ADDRESS]</li>
-                    <li>Phone: +91 [PHONE]</li>
-                    <li>Location: India</li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container footer-bottom-container">
-                <p>&copy; 2026 Brand Inc. All rights reserved.</p>
-                <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <span>&middot;</span>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-</body>
-</html>`,
-      css: `* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-}
-
-.header {
-    color: white;
-    background: #130a2e;
-    padding: 1rem 0;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-}
-
-.nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-}
-
-.nav-links a {
-    color: white;
-    text-decoration: none;
-    transition: opacity 0.3s;
-}
-
-.nav-links a:hover {
-    opacity: 0.8;
-}
-
-.hero {
-    height: 100vh;
-    background-color: #130a2e;
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(102, 126, 234, 0.15), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(118, 75, 162, 0.15), transparent 25%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-content {
-    max-width: 600px;
-    padding: 2rem;
-    position: relative;
-    z-index: 1;
-}
-
-.hero-title {
-    font-size: 4rem;
-    font-weight: 800;
-    margin-bottom: 1.25rem;
-    background: linear-gradient(to right, #ffffff, #c5bedb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeInUp 1s ease-out;
-}
-
-.hero-subtitle {
-    font-size: 1.25rem;
-    color: #c5bedb;
-    margin-bottom: 2.5rem;
-    animation: fadeInUp 1s ease-out 0.2s both;
-}
-
-.cta-button {
-    color: #130a2e;
-    font-weight: 700;
-    border: none;
-    padding: 1rem 2.5rem;
-    font-size: 1.1rem;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: fadeInUp 1s ease-out 0.4s both;
-}
-
-.cta-button:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 15px 25px -5px rgba(102, 126, 234, 0.6);
-}
-
-.section {
-    padding: 6rem 2rem;
-    background: #130a2e;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    scroll-margin-top: 70px;
-}
-
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.section-title {
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    color: #ffffff;
-    font-weight: 800;
-}
-
-.section-title.text-left {
-    text-align: left;
-}
-
-.section-subtitle {
-    font-size: 1.1rem;
-    text-align: center;
-    color: #c5bedb;
-    margin-bottom: 3.5rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.features {
-    background: #130a2e;
-}
-
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2.5rem;
-}
-
-.feature-card {
-    background: #21134a;
-    border: 1px solid #3c257d;
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px -10px rgba(102, 126, 234, 0.3);
-    border-color: #667eea;
-}
-
-.feature-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    background: rgba(102, 126, 234, 0.15);
-    color: #00f2fe;
-    margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.feature-card:hover .feature-icon {
-    background: linear-gradient(135deg, #00f2fe 0%, #667eea 100%);
-    color: #130a2e;
-}
-
-.feature-card h3 {
-    font-size: 1.35rem;
-    margin-bottom: 0.75rem;
-    color: #ffffff;
-    font-weight: 700;
-}
-
-.feature-card p {
-    color: #c5bedb;
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-
-.about {
-    background: #170d37;
-}
-
-.about-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.about-content h2 {
-    margin-bottom: 1.5rem;
-}
-
-.about-content p {
-    color: #c5bedb;
-    font-size: 1.05rem;
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-}
-
-.about-points {
-    margin-top: 2rem;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.about-point {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.check-icon {
-    color: #00f2fe;
-    flex-shrink: 0;
-}
-
-.about-point span {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-/* Cleaned up removed SVG wrapper classes */
-
-.testimonials {
-    background: #130a2e;
-}
-
-.testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2.5rem;
-}
-
-.testimonial-card {
-    background: #21134a;
-    border: 1px solid #3c257d;
-    border-radius: 20px;
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all 0.3s ease;
-}
-
-.testimonial-card:hover {
-    box-shadow: 0 15px 35px -10px rgba(102, 126, 234, 0.3);
-    border-color: #667eea;
-}
-
-.stars {
-    color: #f59e0b;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-}
-
-.testimonial-text {
-    font-size: 1rem;
-    color: #c5bedb;
-    font-style: italic;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.user-info h4 {
-    font-size: 0.95rem;
-    color: #ffffff;
-    margin-bottom: 0.15rem;
-}
-
-.user-info span {
-    font-size: 0.8rem;
-    color: #c5bedb;
-}
-
-.footer {
-    background: #0b061d;
-    color: #a59ec0;
-    padding: 5rem 2rem 2rem;
-    border-top: 1px solid #21134a;
-}
-
-.footer-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.2fr;
-    gap: 4rem;
-    margin-bottom: 4rem;
-}
-
-.footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.footer-brand .logo {
-    color: white;
-}
-
-.footer-brand p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    max-width: 320px;
-}
-
-.social-icons {
-    display: flex;
-    gap: 1rem;
-}
-
-.social-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #21134a;
-    color: #a59ec0;
-    transition: all 0.3s ease;
-}
-
-.social-icon:hover {
-    background: linear-gradient(135deg, #00f2fe 0%, #667eea 100%);
-    color: #130a2e;
-    transform: translateY(-3px);
-}
-
-.footer-links h4 {
-    color: white;
-    font-size: 1.05rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-}
-
-.footer-links ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.footer-links a {
-    color: #a59ec0;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-    color: white;
-}
-
-.footer-links li {
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-.footer-bottom {
-    border-top: 1px solid #21134a;
-    padding-top: 2rem;
-}
-
-.footer-bottom-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.875rem;
-}
-
-.footer-legal {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.footer-legal a {
-    color: #a59ec0;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer-legal a:hover {
-    color: white;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@media (max-width: 968px) {
-    .footer-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 3rem;
-    }
-}
-
-@media (max-width: 768px) {
-/* About section media queries removed as it is now centered by default */
-    .section {
-        padding: 4rem 1.5rem;
-    }
-    .footer-container {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-    }
-    .footer-bottom-container {
-        flex-direction: column;
-        text-align: center;
-    }
-}
-`,
-      javascript: `function handleCTA() {
-    alert('Welcome! This is where you would redirect to signup or more info.');
-}
-
-// Add smooth scrolling for navigation links
-document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.nav-links a');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-});
-
-/* Interactive effects script removed */`,
-    },
-  },
-  {
-    id: "interactive-card",
-    name: "Interactive Card",
-    description: "Animated card component",
-    icon: <Palette className="w-4 h-4" />,
-    content: {
-      html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Card</title>
-</head>
-<body>
-    <div class="container">
-        <div class="card" id="interactiveCard">
-            <div class="card-header">
-                <h2>Interactive Card</h2>
-                <span class="status">Active</span>
-            </div>
-            <div class="card-content">
-                <p>Hover over me to see the magic happen!</p>
-                <div class="stats">
-                    <div class="stat">
-                        <span class="stat-number">42</span>
-                        <span class="stat-label">Projects</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">1.2k</span>
-                        <span class="stat-label">Users</span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <button class="btn-primary" onclick="handleAction()">Take Action</button>
-                <button class="btn-secondary">Learn More</button>
-            </div>
-        </div>
-    </div>
-</body>
-</html>`,
-      css: `body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.container {
-    perspective: 1000px;
-}
-
-.card {
-    width: 350px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 2rem;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-.card:hover::before {
-    left: 100%;
-}
-
-.card:hover {
-    transform: translateY(-10px) rotateX(5deg);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.card-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.status {
-    background: #4ade80;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.card-content p {
-    margin-bottom: 1.5rem;
-    opacity: 0.9;
-    line-height: 1.6;
-}
-
-.stats {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat {
-    text-align: center;
-}
-
-.stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #4ade80;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.card-footer {
-    display: flex;
-    gap: 1rem;
-}
-
-.btn-primary, .btn-secondary {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    flex: 1;
-}
-
-.btn-primary {
-    background: #4ade80;
-    color: #1f2937;
-}
-
-.btn-primary:hover {
-    background: #22c55e;
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background: transparent;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}`,
-      javascript: `function handleAction() {
-    const card = document.getElementById('interactiveCard');
-    
-    // Add a pulse effect
-    card.style.animation = 'pulse 0.6s ease-in-out';
-    
-    // Show success message
-    setTimeout(() => {
-        alert('Action completed successfully!');
-        card.style.animation = '';
-    }, 600);
-}
-
-// Add CSS animation dynamically
-const style = document.createElement('style');
-style.textContent = \`
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-\`;
-document.head.appendChild(style);
-
-// Add particle effect on hover
-document.addEventListener('DOMContentLoaded', function() {
-    const card = document.getElementById('interactiveCard');
-    
-    card.addEventListener('mouseenter', function() {
-        createParticles();
-    });
-});
-
-function createParticles() {
-    const container = document.querySelector('.container');
-    
-    for (let i = 0; i < 6; i++) {
-        const particle = document.createElement('div');
-        particle.style.cssText = \`
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #4ade80;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float 2s ease-out forwards;
-            left: \${Math.random() * 100}%;
-            top: \${Math.random() * 100}%;
-        \`;
-        
-        container.appendChild(particle);
-        
-        setTimeout(() => {
-            particle.remove();
-        }, 2000);
-    }
-}
-
-// Add float animation
-const floatStyle = document.createElement('style');
-floatStyle.textContent = \`
-    @keyframes float {
-        0% {
-            opacity: 1;
-            transform: translateY(0px);
-        }
-        100% {
-            opacity: 0;
-            transform: translateY(-50px);
-        }
-    }
-\`;
-document.head.appendChild(floatStyle);`,
-
     },
   },
   {
@@ -1091,7 +139,7 @@ document.head.appendChild(floatStyle);`,
     icon: <Zap className="w-4 h-4" />,
     content: {
       html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Todo</title></head><body><div class="app"><div class="container"><h1>Todo App</h1><div class="input-section"><input type="text" id="todoInput" placeholder="Add a task..."/><button onclick="addTodo()">Add</button></div><ul id="todoList" class="todo-list"></ul><div class="stats"><span id="todoCount">0 remaining</span><button onclick="clearCompleted()">Clear Done</button></div></div></div></body></html>`,
-      css: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:2rem}.container{background:white;border-radius:15px;padding:2rem;max-width:500px;margin:0 auto}h1{text-align:center;color:#333;margin-bottom:2rem}.input-section{display:flex;gap:.5rem;margin-bottom:1.5rem}#todoInput{flex:1;padding:1rem;border:2px solid #e1e5e9;border-radius:10px;font-size:1rem;outline:none}#todoInput:focus{border-color:#667eea}.input-section button{padding:1rem 1.5rem;background:#667eea;color:white;border:none;border-radius:10px;cursor:pointer}.todo-item{display:flex;align-items:center;padding:1rem;border:1px solid #e1e5e9;border-radius:10px;margin-bottom:.5rem}.todo-checkbox{margin-right:1rem;width:20px;height:20px}.todo-text{flex:1}.delete-btn{background:#ef4444;color:white;border:none;padding:.5rem 1rem;border-radius:5px;cursor:pointer}.completed{opacity:.6;text-decoration:line-through}.stats{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid #e1e5e9}.stats button{background:transparent;border:1px solid #e1e5e9;padding:.5rem 1rem;border-radius:5px;cursor:pointer}`,
+      css: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:2rem}.container{background:white;border-radius:15px;padding:2rem;max-width:500px;margin:0 auto}h1{text-align:center;color:#333;margin-bottom:2rem}.input-section{display:flex;gap:.5rem;margin-bottom:1.5rem}#todoInput{flex:1;padding:1rem;border:2px solid #e1e5e9;border-radius:10px;font-size:1rem;outline:none}.input-section button{padding:1rem 1.5rem;background:#667eea;color:white;border:none;border-radius:10px;cursor:pointer}.todo-item{display:flex;align-items:center;padding:1rem;border:1px solid #e1e5e9;border-radius:10px;margin-bottom:.5rem}.todo-checkbox{margin-right:1rem;width:20px;height:20px}.todo-text{flex:1}.delete-btn{background:#ef4444;color:white;border:none;padding:.5rem 1rem;border-radius:5px;cursor:pointer}.completed{opacity:.6;text-decoration:line-through}.stats{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid #e1e5e9}.stats button{background:transparent;border:1px solid #e1e5e9;padding:.5rem 1rem;border-radius:5px;cursor:pointer}`,
       javascript: `let todos=[{id:1,text:'Learn HTML & CSS',completed:true},{id:2,text:'Build a todo app',completed:false}];function addTodo(){const i=document.getElementById('todoInput');const t=i.value.trim();if(!t)return;todos.push({id:Date.now(),text:t,completed:false});i.value='';render()}function deleteTodo(id){todos=todos.filter(t=>t.id!==id);render()}function toggleTodo(id){const t=todos.find(t=>t.id===id);if(t)t.completed=!t.completed;render()}function clearCompleted(){todos=todos.filter(t=>!t.completed);render()}function render(){document.getElementById('todoList').innerHTML=todos.map(t=>\`<li class="todo-item \${t.completed?'completed':''}"><input type="checkbox" class="todo-checkbox" \${t.completed?'checked':''} onchange="toggleTodo(\${t.id})"/><span class="todo-text">\${t.text}</span><button class="delete-btn" onclick="deleteTodo(\${t.id})">Delete</button></li>\`).join('');document.getElementById('todoCount').textContent=\`\${todos.filter(t=>!t.completed).length} remaining\`}document.addEventListener('DOMContentLoaded',()=>{document.getElementById('todoInput').addEventListener('keypress',e=>{if(e.key==='Enter')addTodo()});render()})`,
     },
   },
@@ -1117,23 +165,15 @@ export default function CodeEditor() {
       const urlParams = new URLSearchParams(window.location.search)
       const sharedCode = urlParams.get("code")
       if (sharedCode) return JSON.parse(safeBase64Decode(sharedCode)) as CodeContent
-
-    } catch {}
-
     } catch {
-      // invalid share URL â€” fall through
+      // invalid share URL — fall through
     }
-
     try {
       const saved = localStorage.getItem("webify_code")
       if (saved) return JSON.parse(saved) as CodeContent
-
-    } catch {}
-
     } catch {
-      // corrupted storage â€” fall through
+      // corrupted storage — fall through
     }
-
     return templates[0].content
   })
 
@@ -1146,26 +186,39 @@ export default function CodeEditor() {
   const [splitRatio, setSplitRatio] = useState(50)
   const [isResizing, setIsResizing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-
   const [consoleErrors, setConsoleErrors] = useState<Array<{message: string; line?: number; col?: number}>>([])
   const [consoleOpen, setConsoleOpen] = useState(false)
-
-
   const [moreSheetOpen, setMoreSheetOpen] = useState(false)
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
+  const [templateSnapshots, setTemplateSnapshots] = useState<Record<string, CodeContent>>(() => {
+    if (typeof window === "undefined") return {}
+    try {
+      const saved = localStorage.getItem("webify_template_snapshots")
+      if (saved) return JSON.parse(saved) as Record<string, CodeContent>
+    } catch {
+      // corrupted storage — fall through
+    }
+    return {}
+  })
 
+  const isDragging = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLIFrameElement>(null)
+  const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
+  const codeRef = useRef<CodeContent>(code)
 
+  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
 
-  // use effect for handling full screen mode
+  useEffect(() => { codeRef.current = code }, [code])
+
   useEffect(() => {
-  const checkMobile = () => setIsMobile(window.innerWidth < 768)
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-  return () => window.removeEventListener('resize', checkMobile)
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   useEffect(() => {
-
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "WEBIFY_ERROR") {
         setConsoleErrors((prev) => [...prev, {
@@ -1176,224 +229,31 @@ export default function CodeEditor() {
         setConsoleOpen(true)
       }
     }
-  window.addEventListener("message", handleMessage)
-  return () => window.removeEventListener("message", handleMessage)
+    window.addEventListener("message", handleMessage)
+    return () => window.removeEventListener("message", handleMessage)
   }, [])
 
   useEffect(() => {
-
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  const handleFullscreenToggle = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        }
-      }
-    } catch (err) {
-      console.error("Error attempting to toggle fullscreen:", err);
-      setIsFullscreen((prev) => !prev);
+      setIsFullscreen(!!document.fullscreenElement)
     }
-  };
-
-const containerRef = useRef<HTMLDivElement>(null)
-const previewRef = useRef<HTMLIFrameElement>(null)
-
-const [isMobile, setIsMobile] = useState(false)
-
-useEffect(() => {
-  const updateIsMobile = () => {
-    setIsMobile(window.innerWidth < 768)
-  }
-
-  updateIsMobile()
-  window.addEventListener("resize", updateIsMobile)
-
-  return () => {
-    window.removeEventListener("resize", updateIsMobile)
-  }
-}, [])
-
-
-// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
-const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
-
-
-// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
-const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
-
-
-
-const handleDragStart = () => {
-  isDragging.current = true;
-  setIsResizing(true);
-  document.body.style.userSelect = "none";
-};
-
-const handleDragMove = useCallback((clientX: number, clientY: number) => {
-  if (!isDragging.current || !containerRef.current) return;
-
-  const rect = containerRef.current.getBoundingClientRect();
-
-  let newRatio;
-  if (isMobile) {
-    newRatio = ((clientY - rect.top) / rect.height) * 100;
-  } else {
-    newRatio = ((clientX - rect.left) / rect.width) * 100;
-  }
-
-  const clampedRatio = Math.max(20, Math.min(80, newRatio));
-  setSplitRatio(clampedRatio);
-}, [isMobile]);
-
-const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
-  handleDragMove(e.clientX, e.clientY);
-}, [handleDragMove]);
-
-const handleTouchMove = useCallback((e: globalThis.TouchEvent) => {
-  if (isDragging.current) {
-    handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
-  }
-}, [handleDragMove]);
-
-const handleDragEnd = useCallback(() => {
-  isDragging.current = false;
-  setIsResizing(false);
-  document.body.style.userSelect = "auto";
-  document.body.style.cursor = "default";
-}, []);
-
-  // Tracks which template is currently active
-  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
-  const formatCode = useCallback(async () => {
-  try {
-    let formatted: string
-    const current = code[activeTab]
-
-    if (activeTab === 'html') {
-      formatted = await prettier.format(current, {
-        parser: 'html',
-        plugins: [parserHtml],
-      })
-    } else if (activeTab === 'css') {
-      formatted = await prettier.format(current, {
-        parser: 'css',
-        plugins: [parserCss],
-      })
-    } else {
-      formatted = await prettier.format(current, {
-        parser: 'babel',
-        plugins: [parserBabel, parserEstree],
-      })
-    }
-
-    setCode((prev) => ({ ...prev, [activeTab]: formatted }))
-    toast.success(`${activeTab.toUpperCase()} formatted successfully`)
-  } catch {
-    toast.error('Could not format code â€” check for syntax errors')
-  }
-}, [activeTab, code])
-
-  // Per-template memory: stores the user's last-edited code for each template
-
-  const [templateSnapshots, setTemplateSnapshots] = useState<Record<string, CodeContent>>(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const saved = localStorage.getItem("webify_template_snapshots")
-      if (saved) return JSON.parse(saved) as Record<string, CodeContent>
-
-    } catch {}
-
-    } catch {
-      // corrupted storage â€” fall through
-    }
-
-    return {}
-  })
-
-  const isDragging = useRef(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const previewRef = useRef<HTMLIFrameElement>(null)
-  const activeEditorRef = useRef<any>(null)
-  const codeRef = useRef<CodeContent>(code)
-
-  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
-
-  // Keep mobile state in sync
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
   }, [])
 
-  // Keep codeRef fresh
-  useEffect(() => { codeRef.current = code }, [code])
-
-
-  const codeRef = useRef<CodeContent>(code)
-  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
-  // Keep codeRef in sync so beforeunload always has the latest values
-
-
-  // Save template snapshots
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try { localStorage.setItem('webify_code', JSON.stringify(code)) } catch {}
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [code])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      try { localStorage.setItem("webify_template_snapshots", JSON.stringify(templateSnapshots)) } catch {}
-
-
-  // Auto-save code to localStorage, debounced 500ms
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem('webify_code', JSON.stringify(code))
-      } catch (err) {
-        // QuotaExceededError â€” localStorage full, fail silently
-        console.warn('Webify: auto-save failed', err)
-      }
-
+      try { localStorage.setItem('webify_template_snapshots', JSON.stringify(templateSnapshots)) } catch {}
     }, 500)
     return () => clearTimeout(timer)
   }, [templateSnapshots])
-
-
-  // Column resizer: start dragging handler for desktop resizer
-  const handleMouseDown = () => {
-    handleDragStart()
-    document.body.style.cursor = "col-resize"
-  }
-
-
-  // Theme init
-
-
-
-  // Auto-save per-template snapshots to localStorage, debounced 500ms
-useEffect(() => {
-  const timer = setTimeout(() => {
-    try {
-      localStorage.setItem('webify_template_snapshots', JSON.stringify(templateSnapshots))
-    } catch (err) {
-      console.warn('Webify: template snapshot save failed', err)
-    }
-  }, 500)
-  return () => clearTimeout(timer)
-}, [templateSnapshots])
-
-  // empty deps â€” registers once, codeRef keeps values fresh
-  // Initialize theme from storage/preferences on mount
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null
@@ -1419,7 +279,6 @@ useEffect(() => {
     }
   }
 
-  // Drag handlers
   const handleDragStart = useCallback(() => {
     isDragging.current = true
     setIsResizing(true)
@@ -1466,138 +325,22 @@ useEffect(() => {
     }
   }, [handleMouseMove, handleTouchMove, handleDragEnd])
 
-
-    // Show validation errors immediately — no debounce needed here since
-    // we are only setting srcdoc, not rebuilding the full iframe.
-
-  // Preview rendering
   useEffect(() => {
     if (!previewRef.current || !autoRun) return
-
     if (!htmlValidation.isValid) {
       previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
-
-
-    // Debounce the iframe rebuild by 400ms so the preview only refreshes
-    // after the user pauses typing, not on every single keystroke.
-    // This prevents: flickering, animation/timer resets mid-keystroke,
-    // and unnecessary CPU churn during fast typing.
-    // 400ms matches CodePen's debounce — fast enough to feel live,
-    // long enough to batch rapid keystrokes into one render.
     const debounceTimer = setTimeout(() => {
       if (!previewRef.current) return
-
-      const combinedCode = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Live Preview</title>
-          <style>${code.css}</style>
-        </head>
-        <body>
-          ${code.html}
-          <script>
-            (function() {
-              var _killTimer = setTimeout(function() {
-                document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">&#9888;&#65039; Script timed out after 5 seconds — possible infinite loop.</div>';
-              }, 5000);
-              try {
-                ${code.javascript}
-              } catch(e) {
-                clearTimeout(_killTimer);
-                var el = document.createElement('div');
-                el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-                el.textContent = '&#9888;&#65039; JS Error: ' + e.message;
-                document.body.appendChild(el);
-                return;
-              }
-              clearTimeout(_killTimer);
-            })();
-          <\/script>
-        </body>
-        </html>
-      `
-
+      const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Live Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){window.onerror=function(msg,src,line,col){window.parent.postMessage({type:'WEBIFY_ERROR',message:String(msg),line:line,col:col},'*');return true};var k=setTimeout(function(){window.parent.postMessage({type:'WEBIFY_ERROR',message:'Script timed out after 5 seconds'},'*');document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);window.parent.postMessage({type:'WEBIFY_ERROR',message:e.message},'*');var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()\<\/script></body></html>`
+      setConsoleErrors([])
       const blob = new Blob([combinedCode], { type: "text/html" })
       const url = URL.createObjectURL(blob)
       previewRef.current.src = url
-
-      // Revoke the blob URL after the iframe has loaded it,
-      // preventing object URL leaks on every keystroke.
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     }, 400)
-
-    // Cancel the pending rebuild if code changes again before 400ms elapses.
-    // Only the last keystroke in a burst will actually trigger a refresh.
     return () => clearTimeout(debounceTimer)
-
-    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
-
-    const combinedCode = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Live Preview</title>
-        <style>${code.css}</style>
-      </head>
-      <body>
-        ${code.html}
-        <script>
-          (function() {
-            window.onerror = function(msg, src, line, col) {
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
-              return true;
-            };
-            var _origConsoleError = console.error;
-            console.error = function() {
-              var msg = Array.prototype.slice.call(arguments).join(' ');
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
-              _origConsoleError.apply(console, arguments);
-            };
-            var _killTimer = setTimeout(function() {
-
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
-
-              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
-
-            }, 5000);
-            try {
-              ${code.javascript}
-            } catch(e) {
-              clearTimeout(_killTimer);
-
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
-
-              var el = document.createElement('div');
-              el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-              el.textContent = 'âš ï¸ JS Error: ' + e.message;
-              document.body.appendChild(el);
-
-              return;
-            }
-            clearTimeout(_killTimer);
-          })();
-        <\/script>
-      </body>
-      </html>
-    `
-    setConsoleErrors([])
-    const blob = new Blob([combinedCode], { type: "text/html" })    
-    
-    
-
-    const blob = new Blob([combinedCode], { type: "text/html" })
-
-    const url = URL.createObjectURL(blob)
-    previewRef.current.src = url
-    return () => URL.revokeObjectURL(url)
-
   }, [code, htmlValidation, autoRun])
 
   const runCodeManually = () => {
@@ -1606,72 +349,30 @@ useEffect(() => {
       previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
-
-    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
-
-
-    const combinedCode = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Live Preview</title>
-      <style>${code.css}</style>
-    </head>
-    <body>
-      ${code.html}
-      <script>
-        (function() {
-          window.onerror = function(msg, src, line, col) {
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
-            return true;
-          };
-          var _origConsoleError = console.error;
-          console.error = function() {
-            var msg = Array.prototype.slice.call(arguments).join(' ');
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
-            _origConsoleError.apply(console, arguments);
-          };
-          var _killTimer = setTimeout(function() {
-
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
-
-            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
-
-          }, 5000);
-          try {
-            ${code.javascript}
-          } catch(e) {
-            clearTimeout(_killTimer);
-
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
-
-            var el = document.createElement('div');
-            el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-            el.textContent = 'âš ï¸ JS Error: ' + e.message;
-            document.body.appendChild(el);
-
-            return;
-          }
-          clearTimeout(_killTimer);
-        })();
-      <\/script>
-    </body>
-    </html>
-  `
-
+    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Live Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){window.onerror=function(msg,src,line,col){window.parent.postMessage({type:'WEBIFY_ERROR',message:String(msg),line:line,col:col},'*');return true};var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()\<\/script></body></html>`
     setConsoleErrors([])
-
-
-
-
     const blob = new Blob([combinedCode], { type: "text/html" })
-
-    
     const url = URL.createObjectURL(blob)
     previewRef.current.src = url
   }
+
+  const formatCode = useCallback(async () => {
+    try {
+      let formatted: string
+      const current = code[activeTab]
+      if (activeTab === 'html') {
+        formatted = await prettier.format(current, { parser: 'html', plugins: [parserHtml] })
+      } else if (activeTab === 'css') {
+        formatted = await prettier.format(current, { parser: 'css', plugins: [parserCss] })
+      } else {
+        formatted = await prettier.format(current, { parser: 'babel', plugins: [parserBabel, parserEstree] })
+      }
+      setCode((prev) => ({ ...prev, [activeTab]: formatted }))
+      toast.success(`${activeTab.toUpperCase()} formatted successfully`)
+    } catch {
+      toast.error('Could not format code — check for syntax errors')
+    }
+  }, [activeTab, code])
 
   const handleCodeChange = (language: keyof CodeContent, value: string) => {
     setCode((prev) => ({ ...prev, [language]: value }))
@@ -1741,7 +442,16 @@ useEffect(() => {
     }
   }
 
-  // Load shared code from URL on mount
+  const handleAIGenerate = (generated: { html: string; css: string; javascript: string }) => {
+    setCode({
+      html: generated.html,
+      css: generated.css,
+      javascript: generated.javascript,
+    })
+    setActiveTab("html")
+if (layout === "preview") setLayout("split")
+  }
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const sharedCode = urlParams.get("code")
@@ -1756,7 +466,6 @@ useEffect(() => {
     }
   }, [])
 
-  // Share URL for CopyButton
   const shareUrl = typeof window !== "undefined"
     ? `${window.location.origin}?code=${safeBase64Encode(JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }))}`
     : ""
@@ -1791,14 +500,10 @@ useEffect(() => {
         keywords: "ctrl y ctrl shift z history redo",
         perform: () => { const ed = activeEditorRef.current; if (ed) { ed.focus(); ed.trigger("palette", "redo", null) } },
       },
+      { id: "action-format", label: "Format code", group: "Actions", icon: <Zap className="w-4 h-4" />, keywords: "prettier format beautify", perform: formatCode },
       { id: "action-import", label: "Import HTML file", group: "Actions", icon: <Upload className="w-4 h-4" />, keywords: "open upload load", perform: importCode },
       { id: "action-download", label: "Download project", group: "Actions", icon: <Download className="w-4 h-4" />, keywords: "export save html", perform: downloadCode },
       { id: "action-share", label: "Copy shareable link", group: "Actions", icon: <LinkIcon className="w-4 h-4" />, keywords: "url clipboard share", perform: copyShareLink },
-      {
-        id: "action-open-tab", label: "Open preview in new tab", group: "Actions", icon: <Maximize2 className="w-4 h-4" />,
-        keywords: "window external browser",
-        perform: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") },
-      },
       {
         id: "action-fullscreen", label: isFullscreen ? "Exit fullscreen" : "Enter fullscreen", group: "Actions",
         icon: isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />,
@@ -1832,57 +537,6 @@ useEffect(() => {
     return () => window.removeEventListener("keydown", onKeyDown, true)
   }, [])
 
-  // ─── Shared editor panel ────────────────────────────────────────────────────
-  const EditorPanel = (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as keyof CodeContent)} className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 shrink-0">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="html">HTML</TabsTrigger>
-          <TabsTrigger value="css">CSS</TabsTrigger>
-          <TabsTrigger value="javascript">JS</TabsTrigger>
-        </TabsList>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <TabsContent value="html" className="h-full m-0">
-          <MonacoEditor language="html" value={code.html} onChange={(v) => handleCodeChange("html", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-        <TabsContent value="css" className="h-full m-0">
-          <MonacoEditor language="css" value={code.css} onChange={(v) => handleCodeChange("css", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-        <TabsContent value="javascript" className="h-full m-0">
-          <MonacoEditor language="javascript" value={code.javascript} onChange={(v) => handleCodeChange("javascript", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-      </div>
-    </Tabs>
-  )
-
-  // ─── Shared preview panel ───────────────────────────────────────────────────
-  const PreviewPanel = (
-    <div className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0 flex-wrap">
-        <Play className="w-4 h-4 text-green-600 shrink-0" />
-        <span className="font-medium text-sm text-gray-900 dark:text-white">Live Preview</span>
-        <Badge variant="secondary" className="text-xs shrink-0">{autoRun ? "Auto" : "Manual"}</Badge>
-        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setAutoRun(!autoRun)}>
-          {autoRun ? "Pause" : "Resume"}
-        </Button>
-        {!autoRun && (
-          <Button size="sm" className="h-7 text-xs" onClick={runCodeManually}>Run</Button>
-        )}
-      </div>
-      <div className={`flex-1 bg-white dark:bg-gray-900 relative ${isResizing ? "pointer-events-none" : ""}`}>
-        <iframe
-          ref={previewRef}
-          className="absolute inset-0 w-full h-full border-0"
-          title="Live Preview"
-          sandbox="allow-scripts allow-forms allow-popups allow-modals"
-        />
-        {isResizing && <div className="absolute inset-0 z-20" />}
-      </div>
-    </div>
-  )
-
-  // ─── Bottom nav items ───────────────────────────────────────────────────────
   const bottomNavItems = [
     { label: "Code", icon: <Code2 className="w-5 h-5" />, action: () => setLayout("code"), active: layout === "code" },
     { label: "Split", icon: <Layout className="w-5 h-5" />, action: () => setLayout("split"), active: layout === "split" },
@@ -1893,511 +547,261 @@ useEffect(() => {
 
   return (
     <AppErrorBoundary>
-    <>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
+      <>
+        <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
 
-      {/* ── More sheet (mobile) ── */}
-      {moreSheetOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setMoreSheetOpen(false)}
-          />
-          {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl px-4 pt-4 pb-8 animate-in slide-in-from-bottom-4 duration-200">
-            {/* Handle bar */}
-            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">More actions</span>
-              <button onClick={() => setMoreSheetOpen(false)} className="p-1 rounded-md text-gray-500">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Import file", icon: <Upload className="w-5 h-5" />, action: importCode },
-                { label: "Share link", icon: <LinkIcon className="w-5 h-5" />, action: copyShareLink },
-                { label: "Open in tab", icon: <Maximize2 className="w-5 h-5" />, action: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") } },
-                { label: isFullscreen ? "Exit fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />, action: () => { setIsFullscreen(v => !v); setMoreSheetOpen(false) } },
-                { label: "Command palette", icon: <Search className="w-5 h-5" />, action: () => { setMoreSheetOpen(false); setPaletteOpen(true) } },
-                { label: theme === "light" ? "Dark mode" : "Light mode", icon: theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />, action: () => { toggleTheme(); setMoreSheetOpen(false) } },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => { item.action(); setMoreSheetOpen(false) }}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 active:scale-95 transition-transform"
-                >
-                  <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>
-                  {item.label}
+        {/* More sheet (mobile) */}
+        {moreSheetOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMoreSheetOpen(false)} />
+            <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl px-4 pt-4 pb-8">
+              <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">More actions</span>
+                <button onClick={() => setMoreSheetOpen(false)} className="p-1 rounded-md text-gray-500">
+                  <X className="w-4 h-4" />
                 </button>
-              ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Import file", icon: <Upload className="w-5 h-5" />, action: importCode },
+                  { label: "Share link", icon: <LinkIcon className="w-5 h-5" />, action: copyShareLink },
+                  { label: "Open in tab", icon: <Maximize2 className="w-5 h-5" />, action: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") } },
+                  { label: isFullscreen ? "Exit fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />, action: () => { setIsFullscreen(v => !v); setMoreSheetOpen(false) } },
+                  { label: "Command palette", icon: <Search className="w-5 h-5" />, action: () => { setMoreSheetOpen(false); setPaletteOpen(true) } },
+                  { label: theme === "light" ? "Dark mode" : "Light mode", icon: theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />, action: () => { toggleTheme(); setMoreSheetOpen(false) } },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => { item.action(); setMoreSheetOpen(false) }}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 active:scale-95 transition-transform"
+                  >
+                    <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Root container ── */}
-      <div className={`h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
+        <div className={`h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
 
-        {/* ── HEADER ── */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shrink-0">
-          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-3">
-
-            {/* Left: logo + template selector */}
-            <div className="flex items-center gap-2 min-w-0">
-              <Link href="/" className="flex items-center gap-1.5 shrink-0">
-                <Code2 className="w-5 h-5 text-blue-600" />
-                <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:block">Webify</span>
-              </Link>
-
-              <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-                <SelectTrigger className="w-36 sm:w-44 md:w-52 h-8 text-xs md:text-sm">
-                  <SelectValue placeholder="Template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      <div className="flex items-center gap-2">
-                        {template.icon}
-                        <div>
-                          <div className="font-medium text-sm">{template.name}</div>
-                          <div className="text-xs text-gray-500 hidden sm:block">{template.description}</div>
+          {/* HEADER */}
+          <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shrink-0">
+            <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <Link href="/" className="flex items-center gap-1.5 shrink-0">
+                  <Code2 className="w-5 h-5 text-blue-600" />
+                  <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:block">Webify</span>
+                </Link>
+                <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
+                  <SelectTrigger className="w-36 sm:w-44 md:w-52 h-8 text-xs md:text-sm">
+                    <SelectValue placeholder="Template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        <div className="flex items-center gap-2">
+                          {template.icon}
+                          <div>
+                            <div className="font-medium text-sm">{template.name}</div>
+                            <div className="text-xs text-gray-500 hidden sm:block">{template.description}</div>
+                          </div>
                         </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPaletteOpen(true)}
-                title="Command palette (Ctrl/Cmd + K)"
-                className="hidden sm:flex w-72 justify-start text-gray-500 dark:text-gray-400"
+                className="hidden md:flex flex-1 max-w-xs justify-start text-gray-500 dark:text-gray-400 h-8 text-xs"
               >
-                <Search className="w-4 h-4 mr-2" />
-                Search commands...
-                <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
-                  âŒ˜K
-                </kbd>
+                <Search className="w-3.5 h-3.5 mr-2" />
+                Search commands…
+                <kbd className="ml-auto rounded border border-gray-200 px-1.5 py-0.5 text-[10px] dark:border-gray-600">⌘K</kbd>
               </Button>
 
-            </div>
-
-            {/* Center: search (desktop only) */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPaletteOpen(true)}
-              className="hidden md:flex flex-1 max-w-xs justify-start text-gray-500 dark:text-gray-400 h-8 text-xs"
-            >
-              <Search className="w-3.5 h-3.5 mr-2" />
-              Search commands…
-              <kbd className="ml-auto rounded border border-gray-200 px-1.5 py-0.5 text-[10px] dark:border-gray-600">⌘K</kbd>
-            </Button>
-
-            {/* Right: desktop actions */}
-            <div className="hidden md:flex items-center gap-1.5">
-              {/* Layout group */}
-              <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
-                <Button variant={layout === "code" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("code")} title="Code only"><Code2 className="w-4 h-4" /></Button>
-                <Button variant={layout === "split" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("split")} title="Split view"><Layout className="w-4 h-4" /></Button>
-                <Button variant={layout === "preview" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("preview")} title="Preview only"><Play className="w-4 h-4" /></Button>
-              </div>
-
-
-              <div className="w-px h-5 bg-gray-200 dark:bg-gray-600" />
-
-              <Separator orientation="vertical" className="h-6" />
-
-              {/* Action Buttons */}
-              <Button variant="outline" size="sm" onClick={formatCode}>
-                <Zap className="w-4 h-4 mr-2" />
-                Format
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={importCode}>
-                <Upload className="w-4 h-4 mr-2" />
-                Import
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={downloadCode}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-
-              <CopyButton
-                text={
-                  typeof window !== "undefined"
-                    ? `${window.location.origin}?code=${safeBase64Encode(
-                      JSON.stringify({
-                        html: code.html,
-                        css: code.css,
-                        javascript: code.javascript,
-                      })
-                    )}`
-                    : ""
-                }
-              />
-
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={importCode}><Upload className="w-3.5 h-3.5 mr-1.5" />Import</Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={downloadCode}><Download className="w-3.5 h-3.5 mr-1.5" />Download</Button>
-              <CopyButton text={shareUrl} />
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setIsFullscreen(!isFullscreen)}>
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              </Button>
-            </div>
-
-            {/* Right: mobile compact actions */}
-            <div className="flex md:hidden items-center gap-1">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPaletteOpen(true)}>
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </header>
-
-
-
-        {/* ── MAIN WORKSPACE ── */}
-        <div
-          ref={containerRef}
-          className={`flex-1 overflow-hidden flex ${isMobile ? "flex-col" : "flex-row"}`}
-          // leave room for bottom nav on mobile
-          style={isMobile ? { paddingBottom: "56px" } : {}}
-        >
-          {/* Code panel */}
-          {(layout === "code" || layout === "split") && (
-          
-            <div
-              style={
-                
-                layout === "split"
-
-                  ? {
-                    
-                    width: isMobile ? "100%" : `${splitRatio}%`,
-                    height: isMobile ? `${splitRatio}%` : "100%",
-                  }
-                  : { height: "100%", width: "100%" }
-              }
-              className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
-
-
-                  ? isMobile
-                    ? { height: `${splitRatio}%` }
-                    : { width: `${splitRatio}%` }
-                  : { flex: 1 }
-              }
-              className={`flex flex-col overflow-hidden shrink-0 ${!isMobile && layout === "split" ? "border-r border-gray-200 dark:border-gray-700" : ""}`}
-
-            >
-              {EditorPanel}
-            </div>
-          )}
-
-          {/* Resizer */}
-          {layout === "split" && (
-            <div
-              onMouseDown={() => { handleDragStart(); document.body.style.cursor = isMobile ? "row-resize" : "col-resize" }}
-              onTouchStart={handleDragStart}
-              onDragStart={(e) => e.preventDefault()}
-
-              className="w-full h-3 md:w-2 md:h-full cursor-row-resize md:cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10 flex items-center justify-center touch-none"
-            >
-              <div className="flex md:flex-col gap-1">
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
-              </div>
-            </div>
-          )}
-
-          {/* PREVIEW */}
-          {(layout === "preview" || layout === "split") && (
-            <div
-              style={layout === "split"
-                ? {
-                  width: isMobile ? "100%" : `${100 - splitRatio}%`,
-                  height: isMobile ? `${100 - splitRatio}%` : "100%",
-                }
-                : { height: "100%", width: "100%" }
-              }
-              className="flex flex-col shrink-0 relative transition-none"
-
-            >
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between overflow-x-auto scrollbar-hide shrink-0">
-                <div className="flex items-center gap-2 min-w-max">
-                  <Play className="w-4 h-4 text-green-600 shrink-0" />
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    Live Preview
-                  </span>
-
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    {autoRun ? "Auto-refresh" : "Manual"}
-                  </Badge>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoRun(!autoRun)}
-                    className="shrink-0"
-                  >
-                    {autoRun ? "Pause" : "Resume"}
-                  </Button>
-
-                  {!autoRun && (
-                    <Button size="sm" onClick={runCodeManually} className="shrink-0">
-                      Run
-                    </Button>
-                  )}
+              <div className="hidden md:flex items-center gap-1.5">
+                <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                  <Button variant={layout === "code" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("code")} title="Code only"><Code2 className="w-4 h-4" /></Button>
+                  <Button variant={layout === "split" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("split")} title="Split view"><Layout className="w-4 h-4" /></Button>
+                  <Button variant={layout === "preview" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("preview")} title="Preview only"><Play className="w-4 h-4" /></Button>
                 </div>
+                <div className="w-px h-5 bg-gray-200 dark:bg-gray-600" />
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={formatCode}><Zap className="w-3.5 h-3.5 mr-1.5" />Format</Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={importCode}><Upload className="w-3.5 h-3.5 mr-1.5" />Import</Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={downloadCode}><Download className="w-3.5 h-3.5 mr-1.5" />Download</Button>
+                <CopyButton text={shareUrl} />
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setIsFullscreen(!isFullscreen)}>
+                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
+                  {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+                </Button>
               </div>
 
-              <div className={`flex-1 bg-white relative ${isResizing ? "pointer-events-none select-none" : ""}`}>
-                <iframe
-                  ref={previewRef}
-                  className="absolute inset-0 w-full h-full border-0"
-                  title="Live Preview"
-                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
-                />
+              <div className="flex md:hidden items-center gap-1">
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
+                  {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPaletteOpen(true)}>
+                  <Search className="w-4 h-4" />
+                </Button>
               </div>
-              {isResizing && (
-                <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize"></div>
-              )}
             </div>
-          )}
+          </header>
 
-        </div>
-
-              className={`shrink-0 z-10 transition-colors ${
-                isMobile
-                  ? "h-2 w-full cursor-row-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
-                  : "w-2 h-full cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
-              }`}
-
-        
-
-
-
-
-
-        {/* Main Container - Code Editor + Preview */}
-        <div
-          ref={containerRef}
-          className="flex-1 flex overflow-hidden"
-        >
-          {/* CODE EDITOR */}
-          {(layout === "code" || layout === "split") && (
-  <EditorErrorBoundary>
-  <div
-  style={
-    layout === "split"
-      ? { 
-        width: isMobile ? "100%" : `${splitRatio}%`,
-        height: isMobile ? `${splitRatio}%` : "100%",
-        }
-      : { height: "100%", width: "100%" }
-  }
-  className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
-  >
-    <Tabs
-      value={activeTab}
-      onValueChange={(value) => setActiveTab(value as keyof CodeContent)}
-      className="flex-1 flex flex-col"
-    >
-      {/* Tabs Header */}
-      <div className="bg-white dark:bg-gray-800 border-b px-4 overflow-x-auto scrollbar-hide">
-        <TabsList className="flex w-full min-w-max">
-        <TabsTrigger value="html" className="flex-1">HTML</TabsTrigger>
-        <TabsTrigger value="css" className="flex-1">CSS</TabsTrigger>
-          <TabsTrigger value="javascript" className="flex-1">JS</TabsTrigger>
-                  
-        </TabsList>
-      </div>
-
-      {/* Tabs Content */}
-      <div className="flex-1 overflow-hidden">
-        <TabsContent value="html" className="h-full m-0">
-          <MonacoEditor
-            language="html"
-            value={code.html}
-            onChange={(value) => handleCodeChange("html", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-
-        <TabsContent value="css" className="h-full m-0">
-          <MonacoEditor
-            language="css"
-            value={code.css}
-            onChange={(value) => handleCodeChange("css", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-
-        <TabsContent value="javascript" className="h-full m-0">
-          <MonacoEditor
-            language="javascript"
-            value={code.javascript}
-            onChange={(value) => handleCodeChange("javascript", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-      </div>
-    </Tabs>
-  </div>
-  </EditorErrorBoundary>
-)}
-
-          {/* RESIZER - DESKTOP ONLY */}
-          {layout === "split" && !isMobile && (
-            <div
-              onMouseDown={handleDragStart}
-              onTouchStart={handleDragStart}
-              onDragStart={(e) => e.preventDefault()}
-              className="w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10"
-
-            />
-          )}
-
-          {/* Preview panel */}
-          {(layout === "preview" || layout === "split") && (
-            <PreviewErrorBoundary>
-            <div
-              style={
-                layout === "split"
-                  ? isMobile
-                    ? { height: `${100 - splitRatio}%` }
-                    : { width: `${100 - splitRatio}%` }
-                  : { flex: 1 }
-              }
-              className="flex flex-col overflow-hidden shrink-0"
-            >
-
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Play className="w-4 h-4 text-green-600 shrink-0" />
-                  <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    {autoRun ? "Auto-refresh" : "Manual"}
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoRun(!autoRun)}
-                    className="shrink-0"
-                  >
-                    {autoRun ? "Pause" : "Resume"}
-                  </Button>
-                  {!autoRun && (
-                    <Button size="sm" onClick={runCodeManually} className="shrink-0">
-                      Run
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className={`flex-1 bg-white dark:bg-gray-900 relative ${
-                  isResizing ? "pointer-events-none" : ""
-                }`}
-              >
-                <iframe
-                  ref={previewRef}
-                  className="absolute inset-0 w-full h-full border-0"
-                  title="Live Preview"
-                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
-                />
-                {isResizing && (
-                  <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize" />
-                )}
-              </div>
-              {/* Console Panel */}
-              <div className={`border-t border-gray-200 dark:border-gray-700 bg-gray-950 transition-all ${consoleOpen ? "h-36" : "h-8"}`}>
+          {/* MAIN WORKSPACE */}
+          <div
+            ref={containerRef}
+            className={`flex-1 overflow-hidden flex ${isMobile ? "flex-col" : "flex-row"}`}
+            style={isMobile ? { paddingBottom: "56px" } : {}}
+          >
+            {/* Code panel */}
+            {(layout === "code" || layout === "split") && (
+              <EditorErrorBoundary>
                 <div
-                  className="flex items-center justify-between px-3 h-8 cursor-pointer select-none"
-                  onClick={() => setConsoleOpen((o) => !o)}
+                  style={
+                    layout === "split"
+                      ? isMobile
+                        ? { height: `${splitRatio}%` }
+                        : { width: `${splitRatio}%` }
+                      : { flex: 1 }
+                  }
+                  className="flex flex-col overflow-hidden shrink-0 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700"
                 >
-                  <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
-                    <span>Console</span>
-                    {consoleErrors.length > 0 && (
-                      <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                        {consoleErrors.length}
-                      </span>
+                  <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as keyof CodeContent)} className="flex-1 flex flex-col">
+                    <div className="bg-white dark:bg-gray-800 border-b px-4 overflow-x-auto scrollbar-hide shrink-0">
+                      <TabsList className="flex w-full min-w-max">
+                        <TabsTrigger value="html" className="flex-1">HTML</TabsTrigger>
+                        <TabsTrigger value="css" className="flex-1">CSS</TabsTrigger>
+                        <TabsTrigger value="javascript" className="flex-1">JS</TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <TabsContent value="html" className="h-full m-0">
+                        <MonacoEditor language="html" value={code.html} onChange={(v) => handleCodeChange("html", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+                      </TabsContent>
+                      <TabsContent value="css" className="h-full m-0">
+                        <MonacoEditor language="css" value={code.css} onChange={(v) => handleCodeChange("css", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+                      </TabsContent>
+                      <TabsContent value="javascript" className="h-full m-0">
+                        <MonacoEditor language="javascript" value={code.javascript} onChange={(v) => handleCodeChange("javascript", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </div>
+              </EditorErrorBoundary>
+            )}
+
+            {/* Resizer */}
+            {layout === "split" && (
+              <div
+                onMouseDown={() => { handleDragStart(); document.body.style.cursor = isMobile ? "row-resize" : "col-resize" }}
+                onTouchStart={handleDragStart}
+                onDragStart={(e) => e.preventDefault()}
+                className={`shrink-0 z-10 transition-colors ${
+                  isMobile
+                    ? "h-2 w-full cursor-row-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
+                    : "w-2 h-full cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
+                }`}
+              />
+            )}
+
+            {/* Preview panel */}
+            {(layout === "preview" || layout === "split") && (
+              <PreviewErrorBoundary>
+                <div
+                  style={
+                    layout === "split"
+                      ? isMobile
+                        ? { height: `${100 - splitRatio}%` }
+                        : { width: `${100 - splitRatio}%` }
+                      : { flex: 1 }
+                  }
+                  className="flex flex-col overflow-hidden shrink-0"
+                >
+                  <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 sm:p-3 flex flex-wrap items-center gap-2 shrink-0">
+                    <Play className="w-4 h-4 text-green-600 shrink-0" />
+                    <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
+                    <Badge variant="secondary" className="text-xs shrink-0">{autoRun ? "Auto-refresh" : "Manual"}</Badge>
+                    <Button variant="outline" size="sm" onClick={() => setAutoRun(!autoRun)} className="shrink-0">
+                      {autoRun ? "Pause" : "Resume"}
+                    </Button>
+                    {!autoRun && (
+                      <Button size="sm" onClick={runCodeManually} className="shrink-0">Run</Button>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {consoleErrors.length > 0 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setConsoleErrors([]) }}
-                        className="text-[10px] text-gray-500 hover:text-gray-300"
-                      >
-                        Clear
-                      </button>
+                  <div className={`flex-1 bg-white dark:bg-gray-900 relative ${isResizing ? "pointer-events-none" : ""}`}>
+                    <iframe
+                      ref={previewRef}
+                      className="absolute inset-0 w-full h-full border-0"
+                      title="Live Preview"
+                      sandbox="allow-scripts allow-forms allow-popups allow-modals"
+                    />
+                    {isResizing && <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize" />}
+                  </div>
+                  {/* Console Panel */}
+                  <div className={`border-t border-gray-200 dark:border-gray-700 bg-gray-950 transition-all ${consoleOpen ? "h-36" : "h-8"}`}>
+                    <div className="flex items-center justify-between px-3 h-8 cursor-pointer select-none" onClick={() => setConsoleOpen((o) => !o)}>
+                      <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
+                        <span>Console</span>
+                        {consoleErrors.length > 0 && (
+                          <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">{consoleErrors.length}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {consoleErrors.length > 0 && (
+                          <button onClick={(e) => { e.stopPropagation(); setConsoleErrors([]) }} className="text-[10px] text-gray-500 hover:text-gray-300">Clear</button>
+                        )}
+                        <span className="text-gray-500 text-xs">{consoleOpen ? "▼" : "▲"}</span>
+                      </div>
+                    </div>
+                    {consoleOpen && (
+                      <div className="overflow-y-auto h-28 px-3 py-1 space-y-1">
+                        {consoleErrors.length === 0 ? (
+                          <p className="text-xs text-gray-500 font-mono">No errors</p>
+                        ) : (
+                          consoleErrors.map((err, i) => (
+                            <div key={i} className="text-xs font-mono text-red-400">
+                              {err.line ? `[${err.line}:${err.col}] ` : ""}{err.message}
+                            </div>
+                          ))
+                        )}
+                      </div>
                     )}
-                    <span className="text-gray-500 text-xs">{consoleOpen ? "▼" : "▲"}</span>
                   </div>
                 </div>
-                {consoleOpen && (
-                  <div className="overflow-y-auto h-28 px-3 py-1 space-y-1">
-                    {consoleErrors.length === 0 ? (
-                      <p className="text-xs text-gray-500 font-mono">No errors</p>
-                    ) : (
-                      consoleErrors.map((err, i) => (
-                        <div key={i} className="text-xs font-mono text-red-400">
-                          {err.line ? `[${err.line}:${err.col}] ` : ""}{err.message}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-              {PreviewPanel}
-            </div>
-            </PreviewErrorBoundary>
-          )}
-        </div>
-
-        {/* ── MOBILE BOTTOM NAV ── */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-stretch h-14">
-            {bottomNavItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={item.action}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors active:scale-95
-                  ${item.active
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-500 dark:text-gray-400"
-                  }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
+              </PreviewErrorBoundary>
+            )}
           </div>
-        </nav>
 
+          {/* Mobile bottom nav */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-stretch h-14">
+              {bottomNavItems.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={item.action}
+                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors active:scale-95 ${
+                    item.active ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+        </div>
 
-      </div>
-    </>
+        <AIAssistant onGenerate={handleAIGenerate} theme={theme} />
+      </>
     </AppErrorBoundary>
   )
 }
