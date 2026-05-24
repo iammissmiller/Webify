@@ -25,7 +25,6 @@ import {
   Link as LinkIcon,
   Timer,
 } from "lucide-react"
-
 import { toast } from "sonner"
 
 
@@ -34,17 +33,12 @@ import { toast } from "sonner"
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-
 import {
   EditorErrorBoundary,
   PreviewErrorBoundary,
   AppErrorBoundary,
 } from "./components/error-boundary"
-
-// Monaco Editor must be loaded client-side only.
-// It directly accesses browser APIs (window, Worker) that don't exist in Node.
-// Removing `ssr: false` or moving this import to a Server Component will
-// cause a hydration crash. Keep this dynamic import exactly as-is.
+import AIAssistant from "./components/AIAssistant"
 
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,
@@ -1070,7 +1064,7 @@ document.head.appendChild(floatStyle);`,
     icon: <Zap className="w-4 h-4" />,
     content: {
       html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Todo</title></head><body><div class="app"><div class="container"><h1>Todo App</h1><div class="input-section"><input type="text" id="todoInput" placeholder="Add a task..."/><button onclick="addTodo()">Add</button></div><ul id="todoList" class="todo-list"></ul><div class="stats"><span id="todoCount">0 remaining</span><button onclick="clearCompleted()">Clear Done</button></div></div></div></body></html>`,
-      css: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:2rem}.container{background:white;border-radius:15px;padding:2rem;max-width:500px;margin:0 auto}h1{text-align:center;color:#333;margin-bottom:2rem}.input-section{display:flex;gap:.5rem;margin-bottom:1.5rem}#todoInput{flex:1;padding:1rem;border:2px solid #e1e5e9;border-radius:10px;font-size:1rem;outline:none}#todoInput:focus{border-color:#667eea}.input-section button{padding:1rem 1.5rem;background:#667eea;color:white;border:none;border-radius:10px;cursor:pointer}.todo-item{display:flex;align-items:center;padding:1rem;border:1px solid #e1e5e9;border-radius:10px;margin-bottom:.5rem}.todo-checkbox{margin-right:1rem;width:20px;height:20px}.todo-text{flex:1}.delete-btn{background:#ef4444;color:white;border:none;padding:.5rem 1rem;border-radius:5px;cursor:pointer}.completed{opacity:.6;text-decoration:line-through}.stats{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid #e1e5e9}.stats button{background:transparent;border:1px solid #e1e5e9;padding:.5rem 1rem;border-radius:5px;cursor:pointer}`,
+      css: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:2rem}.container{background:white;border-radius:15px;padding:2rem;max-width:500px;margin:0 auto}h1{text-align:center;color:#333;margin-bottom:2rem}.input-section{display:flex;gap:.5rem;margin-bottom:1.5rem}#todoInput{flex:1;padding:1rem;border:2px solid #e1e5e9;border-radius:10px;font-size:1rem;outline:none}.input-section button{padding:1rem 1.5rem;background:#667eea;color:white;border:none;border-radius:10px;cursor:pointer}.todo-item{display:flex;align-items:center;padding:1rem;border:1px solid #e1e5e9;border-radius:10px;margin-bottom:.5rem}.todo-checkbox{margin-right:1rem;width:20px;height:20px}.todo-text{flex:1}.delete-btn{background:#ef4444;color:white;border:none;padding:.5rem 1rem;border-radius:5px;cursor:pointer}.completed{opacity:.6;text-decoration:line-through}.stats{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid #e1e5e9}.stats button{background:transparent;border:1px solid #e1e5e9;padding:.5rem 1rem;border-radius:5px;cursor:pointer}`,
       javascript: `let todos=[{id:1,text:'Learn HTML & CSS',completed:true},{id:2,text:'Build a todo app',completed:false}];function addTodo(){const i=document.getElementById('todoInput');const t=i.value.trim();if(!t)return;todos.push({id:Date.now(),text:t,completed:false});i.value='';render()}function deleteTodo(id){todos=todos.filter(t=>t.id!==id);render()}function toggleTodo(id){const t=todos.find(t=>t.id===id);if(t)t.completed=!t.completed;render()}function clearCompleted(){todos=todos.filter(t=>!t.completed);render()}function render(){document.getElementById('todoList').innerHTML=todos.map(t=>\`<li class="todo-item \${t.completed?'completed':''}"><input type="checkbox" class="todo-checkbox" \${t.completed?'checked':''} onchange="toggleTodo(\${t.id})"/><span class="todo-text">\${t.text}</span><button class="delete-btn" onclick="deleteTodo(\${t.id})">Delete</button></li>\`).join('');document.getElementById('todoCount').textContent=\`\${todos.filter(t=>!t.completed).length} remaining\`}document.addEventListener('DOMContentLoaded',()=>{document.getElementById('todoInput').addEventListener('keypress',e=>{if(e.key==='Enter')addTodo()});render()})`,
     },
   },
@@ -1097,14 +1091,12 @@ export default function CodeEditor() {
     } catch {
       // ignore invalid share URL
     }
-
     try {
       const saved = localStorage.getItem("webify_code")
       if (saved) return JSON.parse(saved) as CodeContent
     } catch {
       // ignore corrupted local storage
     }
-
     return templates[0].content
   })
 
@@ -1146,6 +1138,24 @@ export default function CodeEditor() {
     const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${code.css}</style></head><body>${code.html}<script>(function(){try{${code.javascript}}catch(e){var el=document.createElement('div');el.style.cssText='padding:12px;color:#b91c1c;font-family:monospace;';el.textContent='JS Error: '+e.message;document.body.appendChild(el)}})()<\/script></body></html>`
     previewRef.current.srcdoc = combinedCode
   }, [code])
+
+  const formatCode = useCallback(async () => {
+    try {
+      let formatted: string
+      const current = code[activeTab]
+      if (activeTab === 'html') {
+        formatted = await prettier.format(current, { parser: 'html', plugins: [parserHtml] })
+      } else if (activeTab === 'css') {
+        formatted = await prettier.format(current, { parser: 'css', plugins: [parserCss] })
+      } else {
+        formatted = await prettier.format(current, { parser: 'babel', plugins: [parserBabel, parserEstree] })
+      }
+      setCode((prev) => ({ ...prev, [activeTab]: formatted }))
+      toast.success(`${activeTab.toUpperCase()} formatted successfully`)
+    } catch {
+      toast.error('Could not format code — check for syntax errors')
+    }
+  }, [activeTab, code])
 
   const handleCodeChange = (language: keyof CodeContent, value: string) => {
     setCode((prev) => ({ ...prev, [language]: value }))
