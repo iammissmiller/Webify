@@ -52,6 +52,17 @@ import JSZip from "jszip"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 
+import {
+  EditorErrorBoundary,
+  PreviewErrorBoundary,
+  AppErrorBoundary,
+} from "./components/error-boundary"
+
+// Monaco Editor must be loaded client-side only.
+// It directly accesses browser APIs (window, Worker) that don't exist in Node.
+// Removing `ssr: false` or moving this import to a Server Component will
+// cause a hydration crash. Keep this dynamic import exactly as-is.
+
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,
   loading: () => (
@@ -1198,6 +1209,10 @@ export default function CodeEditor() {
 
 const containerRef = useRef<HTMLDivElement>(null)
 const previewRef = useRef<HTMLIFrameElement>(null)
+
+// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
+const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
+
 const handleDragStart = () => {
   isDragging.current = true;
   setIsResizing(true);
@@ -1794,6 +1809,7 @@ useEffect(() => {
   ]
 
   return (
+    <AppErrorBoundary>
     <>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
 
@@ -2017,6 +2033,7 @@ useEffect(() => {
         >
           {/* CODE EDITOR */}
           {(layout === "code" || layout === "split") && (
+  <EditorErrorBoundary>
   <div
   style={
     layout === "split"
@@ -2077,6 +2094,7 @@ useEffect(() => {
       </div>
     </Tabs>
   </div>
+  </EditorErrorBoundary>
 )}
 
           {/* RESIZER - DESKTOP ONLY */}
@@ -2092,6 +2110,7 @@ useEffect(() => {
 
           {/* Preview panel */}
           {(layout === "preview" || layout === "split") && (
+            <PreviewErrorBoundary>
             <div
               style={
                 layout === "split"
@@ -2187,6 +2206,7 @@ useEffect(() => {
 
               {PreviewPanel}
             </div>
+            </PreviewErrorBoundary>
           )}
         </div>
 
@@ -2212,5 +2232,6 @@ useEffect(() => {
 
       </div>
     </>
+    </AppErrorBoundary>
   )
 }
