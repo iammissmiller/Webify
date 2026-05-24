@@ -1,22 +1,17 @@
-"use client"
+﻿"use client"
 
-//(after "use client", before imports)
 const safeBase64Encode = (str: string) =>
   btoa(unescape(encodeURIComponent(str)));
 
 const safeBase64Decode = (str: string) =>
   decodeURIComponent(escape(atob(str)));
 
-
 import type React from "react"
-
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-
 import { CopyButton } from "@/components/ui/copy-button"
 import { CommandPalette, type Command } from "@/components/ui/command-palette"
 
@@ -38,13 +33,25 @@ import {
   Undo2,
   Redo2,
   Timer,
+  MoreHorizontal,
+  X,
 } from "lucide-react"
+
+import { toast } from "sonner"
+
 import { toast } from 'sonner'
+import * as prettier from 'prettier'
+import parserHtml from 'prettier/plugins/html'
+import parserCss from 'prettier/plugins/postcss'
+import parserBabel from 'prettier/plugins/babel'
+import parserEstree from 'prettier/plugins/estree'
+
 
 
 import JSZip from "jszip"
 import dynamic from "next/dynamic"
 import Link from "next/link"
+
 import {
   EditorErrorBoundary,
   PreviewErrorBoundary,
@@ -55,10 +62,13 @@ import {
 // It directly accesses browser APIs (window, Worker) that don't exist in Node.
 // Removing `ssr: false` or moving this import to a Server Component will
 // cause a hydration crash. Keep this dynamic import exactly as-is.
+
 const MonacoEditor = dynamic(() => import("./components/monaco-editor"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">Loading editor...</div>
+    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 text-sm text-gray-500">
+      Loading editor...
+    </div>
   ),
 })
 
@@ -74,117 +84,37 @@ interface HtmlValidationResult {
 }
 
 const voidHtmlTags = new Set([
-  "area",
-  "base",
-  "br",
-  "col",
-  "embed",
-  "hr",
-  "img",
-  "input",
-  "link",
-  "meta",
-  "param",
-  "source",
-  "track",
-  "wbr",
+  "area","base","br","col","embed","hr","img","input","link","meta",
+  "param","source","track","wbr",
 ])
 
 function createPreviewErrorHtml(message: string) {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>HTML Syntax Error</title>
-        <style>
-          body {
-            margin: 0;
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            font-family: Arial, sans-serif;
-            background: #fef2f2;
-            color: #991b1b;
-          }
-          .panel {
-            max-width: 640px;
-            padding: 24px;
-            margin: 24px;
-            border: 1px solid #fecaca;
-            border-radius: 16px;
-            background: white;
-            box-shadow: 0 12px 40px rgba(153, 27, 27, 0.12);
-          }
-          h1 {
-            margin: 0 0 12px;
-            font-size: 20px;
-          }
-          p {
-            margin: 0;
-            line-height: 1.6;
-            white-space: pre-wrap;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="panel">
-          <h1>HTML syntax error</h1>
-          <p>${message}</p>
-        </div>
-      </body>
-    </html>
-  `
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#fef2f2;color:#991b1b}.panel{max-width:640px;padding:24px;margin:24px;border:1px solid #fecaca;border-radius:16px;background:white;box-shadow:0 12px 40px rgba(153,27,27,0.12)}h1{margin:0 0 12px;font-size:20px}p{margin:0;line-height:1.6;white-space:pre-wrap}</style></head><body><div class="panel"><h1>HTML syntax error</h1><p>${message}</p></div></body></html>`
 }
 
 function validateHtmlSyntax(html: string): HtmlValidationResult {
   let sanitizedHtml = html.replace(/<!--[\s\S]*?-->/g, "")
-
   sanitizedHtml = sanitizedHtml.replace(
     /<(script|style|textarea|title)\b([^>]*)>[\s\S]*?<\/\1>/gi,
     (_match, tagName, attributes) => `<${tagName}${attributes}></${tagName}>`
   )
-
   const tagPattern = /<\/?([a-zA-Z][\w:-]*)([^>]*)>/g
   const openTags: string[] = []
   let match: RegExpExecArray | null
-
   while ((match = tagPattern.exec(sanitizedHtml))) {
     const [fullTag, rawTagName] = match
     const tagName = rawTagName.toLowerCase()
     const isClosingTag = fullTag.startsWith("</")
     const isSelfClosingTag = fullTag.endsWith("/>") || voidHtmlTags.has(tagName)
-
     if (isClosingTag) {
       const lastOpenTag = openTags.pop()
-      if (!lastOpenTag) {
-        return { isValid: false, message: `Unexpected closing tag </${tagName}>.` }
-      }
-
-      if (lastOpenTag !== tagName) {
-        return {
-          isValid: false,
-          message: `Expected </${lastOpenTag}> before </${tagName}>.`,
-        }
-      }
-
+      if (!lastOpenTag) return { isValid: false, message: `Unexpected closing tag </${tagName}>.` }
+      if (lastOpenTag !== tagName) return { isValid: false, message: `Expected </${lastOpenTag}> before </${tagName}>.` }
       continue
     }
-
-    if (!isSelfClosingTag) {
-      openTags.push(tagName)
-    }
+    if (!isSelfClosingTag) openTags.push(tagName)
   }
-
-  if (openTags.length > 0) {
-    const lastOpenTag = openTags[openTags.length - 1]
-    return {
-      isValid: false,
-      message: `Unclosed <${lastOpenTag}> tag.`,
-    }
-  }
-
+  if (openTags.length > 0) return { isValid: false, message: `Unclosed <${openTags[openTags.length - 1]}> tag.` }
   return { isValid: true }
 }
 
@@ -214,6 +144,11 @@ const templates: Template[] = [
     description: "Modern landing page template",
     icon: <Layout className="w-4 h-4" />,
     content: {
+
+      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Landing Page</title></head><body><header class="header"><nav class="nav"><div class="logo">Brand</div></nav></header><main class="hero"><div class="hero-content"><h1>Welcome</h1><p>Build amazing things</p><button onclick="alert('Hello!')">Get Started</button></div></main></body></html>`,
+      css: `body{margin:0;font-family:'Segoe UI',sans-serif}.header{background:#130a2e;padding:1rem 2rem;position:fixed;width:100%;top:0;z-index:1000}.nav{display:flex;justify-content:space-between;align-items:center}.logo{color:white;font-size:1.5rem;font-weight:bold}.hero{height:100vh;background:#130a2e;display:flex;align-items:center;justify-content:center;text-align:center;color:white}.hero-content h1{font-size:4rem;margin-bottom:1rem}.hero-content p{color:#c5bedb;margin-bottom:2rem}.hero-content button{padding:1rem 2.5rem;border:none;border-radius:50px;cursor:pointer;font-weight:700;font-size:1.1rem}`,
+      javascript: `console.log('Landing page loaded!')`,
+
       html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,7 +239,7 @@ const templates: Template[] = [
             <p class="section-subtitle">Join thousands of developers and teams already building the future on our platform</p>
             <div class="testimonials-grid">
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
+                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
                     <p class="testimonial-text">"Brand has completely transformed our workflow. The setup was instant, and the interface is incredibly smooth. Deploying landing pages takes seconds now!"</p>
                     <div class="user-info">
                         <div class="avatar">SC</div>
@@ -315,7 +250,7 @@ const templates: Template[] = [
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
+                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
                     <p class="testimonial-text">"The performance boost we saw after migrating to this platform was unbelievable. Plus, the built-in analytics are actually useful rather than bloated."</p>
                     <div class="user-info">
                         <div class="avatar">DM</div>
@@ -326,7 +261,7 @@ const templates: Template[] = [
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
+                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
                     <p class="testimonial-text">"Support is responsive, the documentation is clear, and the developer experience is unmatched. I can't recommend this platform enough."</p>
                     <div class="user-info">
                         <div class="avatar">ER</div>
@@ -1135,6 +1070,18 @@ floatStyle.textContent = \`
     }
 \`;
 document.head.appendChild(floatStyle);`,
+
+    },
+  },
+  {
+    id: "interactive-card",
+    name: "Interactive Card",
+    description: "Animated card component",
+    icon: <Palette className="w-4 h-4" />,
+    content: {
+      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Card</title></head><body><div class="container"><div class="card" id="card"><div class="card-header"><h2>Interactive Card</h2><span class="status">Active</span></div><div class="card-content"><p>Hover over me!</p><div class="stats"><div class="stat"><span class="stat-number">42</span><span class="stat-label">Projects</span></div><div class="stat"><span class="stat-number">1.2k</span><span class="stat-label">Users</span></div></div></div><div class="card-footer"><button onclick="handleAction()">Take Action</button></div></div></div></body></html>`,
+      css: `body{margin:0;min-height:100vh;background:linear-gradient(135deg,#1e3c72,#2a5298);font-family:'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center}.card{width:350px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;padding:2rem;color:white;border:1px solid rgba(255,255,255,0.2);transition:all 0.3s ease;cursor:pointer}.card:hover{transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,0.3)}.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}.status{background:#4ade80;padding:.25rem .75rem;border-radius:20px;font-size:.8rem}.stats{display:flex;gap:2rem;margin-bottom:1.5rem}.stat-number{display:block;font-size:2rem;font-weight:bold;color:#4ade80}.card-footer button{width:100%;padding:.75rem;background:#4ade80;color:#1f2937;border:none;border-radius:10px;cursor:pointer;font-weight:600}`,
+      javascript: `function handleAction(){const card=document.getElementById('card');card.style.animation='pulse 0.6s';setTimeout(()=>{alert('Action!');card.style.animation=''},600)}const s=document.createElement('style');s.textContent='@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}';document.head.appendChild(s)`,
     },
   },
   {
@@ -1143,376 +1090,20 @@ document.head.appendChild(floatStyle);`,
     description: "Interactive todo application",
     icon: <Zap className="w-4 h-4" />,
     content: {
-      html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo App</title>
-</head>
-<body>
-    <div class="app">
-        <div class="container">
-            <h1>My Todo App</h1>
-            <div class="input-section">
-                <input type="text" id="todoInput" placeholder="Add a new task..." />
-                <button onclick="addTodo()">Add</button>
-            </div>
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterTodos('all')">All</button>
-                <button class="filter-btn" onclick="filterTodos('active')">Active</button>
-                <button class="filter-btn" onclick="filterTodos('completed')">Completed</button>
-            </div>
-            <ul id="todoList" class="todo-list"></ul>
-            <div class="stats">
-                <span id="todoCount">0 tasks remaining</span>
-                <button onclick="clearCompleted()">Clear Completed</button>
-            </div>
-        </div>
-    </div>
-</body>
-</html>`,
-      css: `* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 2rem;
-}
-
-.app {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-}
-
-.container {
-    background: white;
-    border-radius: 15px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 2rem;
-    font-size: 2rem;
-}
-
-.input-section {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-#todoInput {
-    flex: 1;
-    padding: 1rem;
-    border: 2px solid #e1e5e9;
-    border-radius: 10px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.3s;
-}
-
-#todoInput:focus {
-    border-color: #667eea;
-}
-
-.input-section button {
-    padding: 1rem 1.5rem;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-}
-
-.input-section button:hover {
-    background: #5a67d8;
-}
-
-.filters {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-}
-
-.filter-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid #e1e5e9;
-    background: white;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.filter-btn.active,
-.filter-btn:hover {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-}
-
-.todo-list {
-    list-style: none;
-    margin-bottom: 1.5rem;
-}
-
-.todo-item {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    border: 1px solid #e1e5e9;
-    border-radius: 10px;
-    margin-bottom: 0.5rem;
-    transition: all 0.3s;
-    animation: slideIn 0.3s ease-out;
-}
-
-.todo-item:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.todo-item.completed {
-    opacity: 0.6;
-    text-decoration: line-through;
-}
-
-.todo-checkbox {
-    margin-right: 1rem;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-
-.todo-text {
-    flex: 1;
-    font-size: 1rem;
-}
-
-.delete-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.delete-btn:hover {
-    background: #dc2626;
-}
-
-.stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid #e1e5e9;
-    color: #666;
-}
-
-.stats button {
-    background: transparent;
-    border: 1px solid #e1e5e9;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.stats button:hover {
-    background: #f3f4f6;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}`,
-      javascript: `let todos = [];
-let currentFilter = 'all';
-
-function addTodo() {
-    const input = document.getElementById('todoInput');
-    const text = input.value.trim();
-    
-    if (text === '') return;
-    
-    const todo = {
-        id: Date.now(),
-        text: text,
-        completed: false
-    };
-    
-    todos.push(todo);
-    input.value = '';
-    renderTodos();
-    updateStats();
-}
-
-function deleteTodo(id) {
-    todos = todos.filter(todo => todo.id !== id);
-    renderTodos();
-    updateStats();
-}
-
-function toggleTodo(id) {
-    const todo = todos.find(todo => todo.id === id);
-    if (todo) {
-        todo.completed = !todo.completed;
-        renderTodos();
-        updateStats();
-    }
-}
-
-function filterTodos(filter) {
-    currentFilter = filter;
-    
-    // Update active filter button
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    renderTodos();
-}
-
-function clearCompleted() {
-    todos = todos.filter(todo => !todo.completed);
-    renderTodos();
-    updateStats();
-}
-
-function renderTodos() {
-    const todoList = document.getElementById('todoList');
-    let filteredTodos = todos;
-    
-    if (currentFilter === 'active') {
-        filteredTodos = todos.filter(todo => !todo.completed);
-    } else if (currentFilter === 'completed') {
-        filteredTodos = todos.filter(todo => todo.completed);
-    }
-    
-    todoList.innerHTML = filteredTodos.map(todo => \`
-        <li class="todo-item \${todo.completed ? 'completed' : ''}">
-            <input 
-                type="checkbox" 
-                class="todo-checkbox" 
-                \${todo.completed ? 'checked' : ''}
-                onchange="toggleTodo(\${todo.id})"
-            />
-            <span class="todo-text">\${todo.text}</span>
-            <button class="delete-btn" onclick="deleteTodo(\${todo.id})">Delete</button>
-        </li>
-    \`).join('');
-}
-
-function updateStats() {
-    const activeTodos = todos.filter(todo => !todo.completed).length;
-    const todoCount = document.getElementById('todoCount');
-    todoCount.textContent = \`\${activeTodos} task\${activeTodos !== 1 ? 's' : ''} remaining\`;
-}
-
-// Add enter key support
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.getElementById('todoInput');
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            addTodo();
-        }
-    });
-    
-    // Add some sample todos
-    todos = [
-        { id: 1, text: 'Learn HTML, CSS, and JavaScript', completed: true },
-        { id: 2, text: 'Build an awesome todo app', completed: false },
-        { id: 3, text: 'Share your creation with friends', completed: false }
-    ];
-    
-    renderTodos();
-    updateStats();
-});`,
+      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Todo</title></head><body><div class="app"><div class="container"><h1>Todo App</h1><div class="input-section"><input type="text" id="todoInput" placeholder="Add a task..."/><button onclick="addTodo()">Add</button></div><ul id="todoList" class="todo-list"></ul><div class="stats"><span id="todoCount">0 remaining</span><button onclick="clearCompleted()">Clear Done</button></div></div></div></body></html>`,
+      css: `*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:2rem}.container{background:white;border-radius:15px;padding:2rem;max-width:500px;margin:0 auto}h1{text-align:center;color:#333;margin-bottom:2rem}.input-section{display:flex;gap:.5rem;margin-bottom:1.5rem}#todoInput{flex:1;padding:1rem;border:2px solid #e1e5e9;border-radius:10px;font-size:1rem;outline:none}#todoInput:focus{border-color:#667eea}.input-section button{padding:1rem 1.5rem;background:#667eea;color:white;border:none;border-radius:10px;cursor:pointer}.todo-item{display:flex;align-items:center;padding:1rem;border:1px solid #e1e5e9;border-radius:10px;margin-bottom:.5rem}.todo-checkbox{margin-right:1rem;width:20px;height:20px}.todo-text{flex:1}.delete-btn{background:#ef4444;color:white;border:none;padding:.5rem 1rem;border-radius:5px;cursor:pointer}.completed{opacity:.6;text-decoration:line-through}.stats{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid #e1e5e9}.stats button{background:transparent;border:1px solid #e1e5e9;padding:.5rem 1rem;border-radius:5px;cursor:pointer}`,
+      javascript: `let todos=[{id:1,text:'Learn HTML & CSS',completed:true},{id:2,text:'Build a todo app',completed:false}];function addTodo(){const i=document.getElementById('todoInput');const t=i.value.trim();if(!t)return;todos.push({id:Date.now(),text:t,completed:false});i.value='';render()}function deleteTodo(id){todos=todos.filter(t=>t.id!==id);render()}function toggleTodo(id){const t=todos.find(t=>t.id===id);if(t)t.completed=!t.completed;render()}function clearCompleted(){todos=todos.filter(t=>!t.completed);render()}function render(){document.getElementById('todoList').innerHTML=todos.map(t=>\`<li class="todo-item \${t.completed?'completed':''}"><input type="checkbox" class="todo-checkbox" \${t.completed?'checked':''} onchange="toggleTodo(\${t.id})"/><span class="todo-text">\${t.text}</span><button class="delete-btn" onclick="deleteTodo(\${t.id})">Delete</button></li>\`).join('');document.getElementById('todoCount').textContent=\`\${todos.filter(t=>!t.completed).length} remaining\`}document.addEventListener('DOMContentLoaded',()=>{document.getElementById('todoInput').addEventListener('keypress',e=>{if(e.key==='Enter')addTodo()});render()})`,
     },
   },
   {
     id: "stopwatch",
     name: "Stopwatch",
-    description: "Simple stopwatch with start, stop and reset",
+    description: "Simple stopwatch",
     icon: <Timer className="w-4 h-4" />,
     content: {
-      html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stopwatch</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Stopwatch</h1>
-        <div class="display" id="display">00:00:00</div>
-        <div class="buttons">
-            <button onclick="startStop()" id="startBtn">Start</button>
-            <button onclick="reset()">Reset</button>
-        </div>
-    </div>
-</body>
-</html>`,
-      css: `body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    font-family: 'Segoe UI', sans-serif;
-}
-.container { text-align: center; color: white; }
-h1 { font-size: 2rem; margin-bottom: 1rem; letter-spacing: 4px; text-transform: uppercase; }
-.display { font-size: 5rem; font-weight: bold; margin: 2rem 0; color: #00d4ff; letter-spacing: 4px; }
-.buttons { display: flex; gap: 1rem; justify-content: center; }
-button { padding: 1rem 2.5rem; font-size: 1rem; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.3s; background: #00d4ff; color: #1a1a2e; }
-button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,212,255,0.3); }`,
-      javascript: `let timer = null;
-let seconds = 0;
-let running = false;
-function startStop() {
-    const btn = document.getElementById('startBtn');
-    if (running) { clearInterval(timer); btn.textContent = 'Start'; running = false; }
-    else { timer = setInterval(() => { seconds++; updateDisplay(); }, 1000); btn.textContent = 'Stop'; running = true; }
-}
-function reset() {
-    clearInterval(timer); seconds = 0; running = false;
-    document.getElementById('startBtn').textContent = 'Start';
-    updateDisplay();
-}
-function updateDisplay() {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    document.getElementById('display').textContent =
-        String(hrs).padStart(2,'0')+':'+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
-}`,
+      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Stopwatch</title></head><body><div class="container"><h1>Stopwatch</h1><div class="display" id="display">00:00:00</div><div class="buttons"><button onclick="startStop()" id="startBtn">Start</button><button onclick="reset()">Reset</button></div></div></body></html>`,
+      css: `body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);font-family:'Segoe UI',sans-serif}.container{text-align:center;color:white}h1{font-size:2rem;margin-bottom:1rem;letter-spacing:4px;text-transform:uppercase}.display{font-size:5rem;font-weight:bold;margin:2rem 0;color:#00d4ff;letter-spacing:4px}.buttons{display:flex;gap:1rem;justify-content:center}button{padding:1rem 2.5rem;font-size:1rem;border:none;border-radius:50px;cursor:pointer;font-weight:600;background:#00d4ff;color:#1a1a2e;transition:all 0.3s}button:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,212,255,0.3)}`,
+      javascript: `let timer=null,seconds=0,running=false;function startStop(){const b=document.getElementById('startBtn');if(running){clearInterval(timer);b.textContent='Start';running=false}else{timer=setInterval(()=>{seconds++;update()},1000);b.textContent='Stop';running=true}}function reset(){clearInterval(timer);seconds=0;running=false;document.getElementById('startBtn').textContent='Start';update()}function update(){const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;document.getElementById('display').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}`,
     },
   },
 ]
@@ -1521,20 +1112,28 @@ type LayoutType = "split" | "preview" | "code"
 
 export default function CodeEditor() {
   const [code, setCode] = useState<CodeContent>(() => {
-    if (typeof window === 'undefined') return templates[0].content
+    if (typeof window === "undefined") return templates[0].content
     try {
       const urlParams = new URLSearchParams(window.location.search)
-      const sharedCode = urlParams.get('code')
+      const sharedCode = urlParams.get("code")
       if (sharedCode) return JSON.parse(safeBase64Decode(sharedCode)) as CodeContent
+
+    } catch {}
+
     } catch {
-      // invalid share URL — fall through
+      // invalid share URL â€” fall through
     }
+
     try {
-      const saved = localStorage.getItem('webify_code')
+      const saved = localStorage.getItem("webify_code")
       if (saved) return JSON.parse(saved) as CodeContent
+
+    } catch {}
+
     } catch {
-      // corrupted storage — fall through
+      // corrupted storage â€” fall through
     }
+
     return templates[0].content
   })
 
@@ -1544,13 +1143,45 @@ export default function CodeEditor() {
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [autoRun, setAutoRun] = useState(true)
-
   const [splitRatio, setSplitRatio] = useState(50)
-  const isDragging = useRef(false)
   const [isResizing, setIsResizing] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  const [consoleErrors, setConsoleErrors] = useState<Array<{message: string; line?: number; col?: number}>>([])
+  const [consoleOpen, setConsoleOpen] = useState(false)
+
+
+  const [moreSheetOpen, setMoreSheetOpen] = useState(false)
+  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
+
+
 
   // use effect for handling full screen mode
   useEffect(() => {
+  const checkMobile = () => setIsMobile(window.innerWidth < 768)
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "WEBIFY_ERROR") {
+        setConsoleErrors((prev) => [...prev, {
+          message: event.data.message,
+          line: event.data.line,
+          col: event.data.col,
+        }])
+        setConsoleOpen(true)
+      }
+    }
+  window.addEventListener("message", handleMessage)
+  return () => window.removeEventListener("message", handleMessage)
+  }, [])
+
+  useEffect(() => {
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -1578,8 +1209,10 @@ export default function CodeEditor() {
 
 const containerRef = useRef<HTMLDivElement>(null)
 const previewRef = useRef<HTMLIFrameElement>(null)
+
 // Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
 const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
+
 const handleDragStart = () => {
   isDragging.current = true;
   setIsResizing(true);
@@ -1622,40 +1255,82 @@ const handleDragEnd = useCallback(() => {
 
   // Tracks which template is currently active
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
+  const formatCode = useCallback(async () => {
+  try {
+    let formatted: string
+    const current = code[activeTab]
+
+    if (activeTab === 'html') {
+      formatted = await prettier.format(current, {
+        parser: 'html',
+        plugins: [parserHtml],
+      })
+    } else if (activeTab === 'css') {
+      formatted = await prettier.format(current, {
+        parser: 'css',
+        plugins: [parserCss],
+      })
+    } else {
+      formatted = await prettier.format(current, {
+        parser: 'babel',
+        plugins: [parserBabel, parserEstree],
+      })
+    }
+
+    setCode((prev) => ({ ...prev, [activeTab]: formatted }))
+    toast.success(`${activeTab.toUpperCase()} formatted successfully`)
+  } catch {
+    toast.error('Could not format code â€” check for syntax errors')
+  }
+}, [activeTab, code])
 
   // Per-template memory: stores the user's last-edited code for each template
+
   const [templateSnapshots, setTemplateSnapshots] = useState<Record<string, CodeContent>>(() => {
-    if (typeof window === 'undefined') return {}
+    if (typeof window === "undefined") return {}
     try {
-      const saved = localStorage.getItem('webify_template_snapshots')
+      const saved = localStorage.getItem("webify_template_snapshots")
       if (saved) return JSON.parse(saved) as Record<string, CodeContent>
+
+    } catch {}
+
     } catch {
-      // corrupted storage — fall through
+      // corrupted storage â€” fall through
     }
+
     return {}
   })
 
+  const isDragging = useRef(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLIFrameElement>(null)
+  const activeEditorRef = useRef<any>(null)
+  const codeRef = useRef<CodeContent>(code)
 
+  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
+
+  // Keep mobile state in sync
   useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleDragEnd);
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleDragEnd);
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleDragEnd);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleDragEnd);
-    };
-  }, [handleMouseMove, handleTouchMove, handleDragEnd]);
+  // Keep codeRef fresh
+  useEffect(() => { codeRef.current = code }, [code])
+
 
   const codeRef = useRef<CodeContent>(code)
   const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
   // Keep codeRef in sync so beforeunload always has the latest values
+
+
+  // Save template snapshots
+
   useEffect(() => {
-    codeRef.current = code
-  }, [code])
+    const timer = setTimeout(() => {
+      try { localStorage.setItem("webify_template_snapshots", JSON.stringify(templateSnapshots)) } catch {}
 
 
   // Auto-save code to localStorage, debounced 500ms
@@ -1664,18 +1339,24 @@ const handleDragEnd = useCallback(() => {
       try {
         localStorage.setItem('webify_code', JSON.stringify(code))
       } catch (err) {
-        // QuotaExceededError — localStorage full, fail silently
+        // QuotaExceededError â€” localStorage full, fail silently
         console.warn('Webify: auto-save failed', err)
       }
+
     }, 500)
     return () => clearTimeout(timer)
-  }, [code])
+  }, [templateSnapshots])
+
 
   // Column resizer: start dragging handler for desktop resizer
   const handleMouseDown = () => {
     handleDragStart()
     document.body.style.cursor = "col-resize"
   }
+
+
+  // Theme init
+
 
 
   // Auto-save per-template snapshots to localStorage, debounced 500ms
@@ -1690,12 +1371,12 @@ useEffect(() => {
   return () => clearTimeout(timer)
 }, [templateSnapshots])
 
-  // empty deps — registers once, codeRef keeps values fresh
+  // empty deps â€” registers once, codeRef keeps values fresh
   // Initialize theme from storage/preferences on mount
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-
     if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
       setTheme("dark")
       document.documentElement.classList.add("dark")
@@ -1717,14 +1398,62 @@ useEffect(() => {
     }
   }
 
-  useEffect(() => {
-    if (!previewRef.current) return
-    if (!autoRun) return
+  // Drag handlers
+  const handleDragStart = useCallback(() => {
+    isDragging.current = true
+    setIsResizing(true)
+    document.body.style.userSelect = "none"
+  }, [])
 
+  const handleDragMove = useCallback((clientX: number, clientY: number) => {
+    if (!isDragging.current || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    let newRatio: number
+    if (isMobile) {
+      newRatio = ((clientY - rect.top) / rect.height) * 100
+    } else {
+      newRatio = ((clientX - rect.left) / rect.width) * 100
+    }
+    setSplitRatio(Math.max(20, Math.min(80, newRatio)))
+  }, [isMobile])
+
+  const handleDragEnd = useCallback(() => {
+    isDragging.current = false
+    setIsResizing(false)
+    document.body.style.userSelect = "auto"
+    document.body.style.cursor = "default"
+  }, [])
+
+  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => handleDragMove(e.clientX, e.clientY), [handleDragMove])
+  const handleTouchMove = useCallback((e: globalThis.TouchEvent) => {
+    if (isDragging.current) {
+      e.preventDefault()
+      handleDragMove(e.touches[0].clientX, e.touches[0].clientY)
+    }
+  }, [handleDragMove])
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleDragEnd)
+    window.addEventListener("touchmove", handleTouchMove, { passive: false })
+    window.addEventListener("touchend", handleDragEnd)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleDragEnd)
+      window.removeEventListener("touchmove", handleTouchMove)
+      window.removeEventListener("touchend", handleDragEnd)
+    }
+  }, [handleMouseMove, handleTouchMove, handleDragEnd])
+
+  // Preview rendering
+  useEffect(() => {
+    if (!previewRef.current || !autoRun) return
     if (!htmlValidation.isValid) {
       previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
+
+    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
 
     const combinedCode = `
       <!DOCTYPE html>
@@ -1739,17 +1468,35 @@ useEffect(() => {
         ${code.html}
         <script>
           (function() {
+            window.onerror = function(msg, src, line, col) {
+              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
+              return true;
+            };
+            var _origConsoleError = console.error;
+            console.error = function() {
+              var msg = Array.prototype.slice.call(arguments).join(' ');
+              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
+              _origConsoleError.apply(console, arguments);
+            };
             var _killTimer = setTimeout(function() {
-              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+
+              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
+
+              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
+
             }, 5000);
             try {
               ${code.javascript}
             } catch(e) {
               clearTimeout(_killTimer);
+
+              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
+
               var el = document.createElement('div');
               el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-              el.textContent = '⚠️ JS Error: ' + e.message;
+              el.textContent = 'âš ï¸ JS Error: ' + e.message;
               document.body.appendChild(el);
+
               return;
             }
             clearTimeout(_killTimer);
@@ -1758,24 +1505,27 @@ useEffect(() => {
       </body>
       </html>
     `
-        
+    setConsoleErrors([])
+    const blob = new Blob([combinedCode], { type: "text/html" })    
     
+    
+
     const blob = new Blob([combinedCode], { type: "text/html" })
+
     const url = URL.createObjectURL(blob)
     previewRef.current.src = url
-
     return () => URL.revokeObjectURL(url)
   }, [code, htmlValidation, autoRun])
 
   const runCodeManually = () => {
     if (!previewRef.current) return
-
     if (!htmlValidation.isValid) {
-      previewRef.current.srcdoc = createPreviewErrorHtml(
-        htmlValidation.message ?? "Invalid HTML syntax."
-      )
+      previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
+
+    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
+
 
     const combinedCode = `
     <!DOCTYPE html>
@@ -1790,17 +1540,35 @@ useEffect(() => {
       ${code.html}
       <script>
         (function() {
+          window.onerror = function(msg, src, line, col) {
+            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
+            return true;
+          };
+          var _origConsoleError = console.error;
+          console.error = function() {
+            var msg = Array.prototype.slice.call(arguments).join(' ');
+            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
+            _origConsoleError.apply(console, arguments);
+          };
           var _killTimer = setTimeout(function() {
-            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
+
+            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
+
+            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
+
           }, 5000);
           try {
             ${code.javascript}
           } catch(e) {
             clearTimeout(_killTimer);
+
+            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
+
             var el = document.createElement('div');
             el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-            el.textContent = '⚠️ JS Error: ' + e.message;
+            el.textContent = 'âš ï¸ JS Error: ' + e.message;
             document.body.appendChild(el);
+
             return;
           }
           clearTimeout(_killTimer);
@@ -1810,7 +1578,14 @@ useEffect(() => {
     </html>
   `
 
+    setConsoleErrors([])
+
+
+
+
     const blob = new Blob([combinedCode], { type: "text/html" })
+
+    
     const url = URL.createObjectURL(blob)
     previewRef.current.src = url
   }
@@ -1819,57 +1594,31 @@ useEffect(() => {
     setCode((prev) => ({ ...prev, [language]: value }))
   }
 
-  // AFTER
-const loadTemplate = (template: Template) => {
-  // Save the current template's edits before switching away
-  if (currentTemplateId) {
-    setTemplateSnapshots(prev => ({ ...prev, [currentTemplateId]: code }))
+  const loadTemplate = (template: Template) => {
+    if (currentTemplateId) {
+      setTemplateSnapshots((prev) => ({ ...prev, [currentTemplateId]: code }))
+    }
+    const savedSnapshot = templateSnapshots[template.id]
+    setCode(savedSnapshot ?? template.content)
+    setCurrentTemplateId(template.id)
+    toast("Template loaded", { description: `${template.name} template loaded.` })
   }
 
-  // Restore the user's last edits for this template, or fall back to its default content
-  const savedSnapshot = templateSnapshots[template.id]
-  setCode(savedSnapshot ?? template.content)
-  setCurrentTemplateId(template.id)
-
-  toast("Template loaded", {
-    description: `${template.name} template has been loaded successfully.`,
-  })
-}
-
-
   const downloadCode = async () => {
-    const zip = new JSZip();
-
-    zip.file("index.html", `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Project</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-${code.html}
-    <script src="script.js"></script>
-</body>
-</html>`);
-
-    zip.file("style.css", code.css);
-    zip.file("script.js", code.javascript);
-
-    const blob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "webify-project.zip";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast("Download started", {
-      description: "Your project has been downloaded as webify-project.zip",
-    });
+    const zip = new JSZip()
+    zip.file("index.html", `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>My Project</title>\n    <link rel="stylesheet" href="style.css">\n</head>\n<body>\n${code.html}\n    <script src="script.js"></script>\n</body>\n</html>`)
+    zip.file("style.css", code.css)
+    zip.file("script.js", code.javascript)
+    const blob = await zip.generateAsync({ type: "blob" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "webify-project.zip"
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast("Download started", { description: "Saved as webify-project.zip" })
   }
 
   const importCode = () => {
@@ -1882,21 +1631,15 @@ ${code.html}
         const reader = new FileReader()
         reader.onload = (e) => {
           const content = e.target?.result as string
-          // Basic parsing - in a real app, you'd want more sophisticated parsing
           const htmlMatch = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
           const cssMatch = content.match(/<style[^>]*>([\s\S]*?)<\/style>/i)
           const jsMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/i)
-
           setCode({
             html: htmlMatch ? htmlMatch[1].trim() : "",
             css: cssMatch ? cssMatch[1].trim() : "",
             javascript: jsMatch ? jsMatch[1].trim() : "",
           })
-
-          toast("File imported", {
-            description: "HTML file has been imported successfully.",
-          });
-
+          toast("File imported", { description: "HTML file imported." })
         }
         reader.readAsText(file)
       }
@@ -1904,191 +1647,95 @@ ${code.html}
     input.click()
   }
 
-  // Load shared code from URL on mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const sharedCode = urlParams.get("code")
-
-    if (sharedCode) {
-      try {
-        const decoded = JSON.parse(safeBase64Decode(sharedCode))
-        setCode(decoded)
-        toast("Shared code loaded", {
-          description: "The shared code has been loaded successfully.",
-        });
-
-      } catch (err) {
-        console.error("Clipboard copy failed:", err);
-        toast.error("Invalid share link", {
-          description: "Could not load shared code.",
-        });
-
-      }
-    }
-  }, [])
-
   const copyShareLink = async () => {
     if (typeof window === "undefined") return
     try {
-      const url = `${window.location.origin}?code=${safeBase64Encode(
-        JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }),
-      )}`
+      const url = `${window.location.origin}?code=${safeBase64Encode(JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }))}`
       await navigator.clipboard.writeText(url)
       toast("Link copied", { description: "Shareable link copied to clipboard." })
-    } catch (err) {
-      console.error("Clipboard copy failed:", err)
+    } catch {
       toast.error("Copy failed", { description: "Could not copy the share link." })
     }
   }
 
+  // Load shared code from URL on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const sharedCode = urlParams.get("code")
+    if (sharedCode) {
+      try {
+        const decoded = JSON.parse(safeBase64Decode(sharedCode))
+        setCode(decoded)
+        toast("Shared code loaded", { description: "Shared code loaded." })
+      } catch {
+        toast.error("Invalid share link", { description: "Could not load shared code." })
+      }
+    }
+  }, [])
+
+  // Share URL for CopyButton
+  const shareUrl = typeof window !== "undefined"
+    ? `${window.location.origin}?code=${safeBase64Encode(JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }))}`
+    : ""
+
   const commands = useMemo<Command[]>(() => {
-    const layoutCmd = (
-      id: string,
-      label: string,
-      value: LayoutType,
-      icon: React.ReactNode,
-    ): Command => ({
-      id,
-      label,
-      group: "Layout",
-      icon,
+    const layoutCmd = (id: string, label: string, value: LayoutType, icon: React.ReactNode): Command => ({
+      id, label, group: "Layout", icon,
       keywords: "view layout panel",
       description: layout === value ? "Active" : undefined,
       perform: () => setLayout(value),
     })
-
-    const tabCmd = (
-      id: string,
-      label: string,
-      value: keyof CodeContent,
-      icon: React.ReactNode,
-    ): Command => ({
-      id,
-      label,
-      group: "Editor",
-      icon,
+    const tabCmd = (id: string, label: string, value: keyof CodeContent, icon: React.ReactNode): Command => ({
+      id, label, group: "Editor", icon,
       keywords: "tab file language",
       description: activeTab === value ? "Active" : undefined,
-      perform: () => {
-        setActiveTab(value)
-        if (layout === "preview") setLayout("split")
-      },
+      perform: () => { setActiveTab(value); if (layout === "preview") setLayout("split") },
     })
-
     return [
       layoutCmd("layout-code", "Code only", "code", <Code2 className="w-4 h-4" />),
       layoutCmd("layout-split", "Split view", "split", <Layout className="w-4 h-4" />),
       layoutCmd("layout-preview", "Preview only", "preview", <Play className="w-4 h-4" />),
-
       tabCmd("tab-html", "Go to HTML", "html", <FileText className="w-4 h-4" />),
       tabCmd("tab-css", "Go to CSS", "css", <Palette className="w-4 h-4" />),
       tabCmd("tab-js", "Go to JavaScript", "javascript", <Zap className="w-4 h-4" />),
-
       {
-        id: "editor-undo",
-        label: "Undo",
-        group: "Editor",
-        icon: <Undo2 className="w-4 h-4" />,
+        id: "editor-undo", label: "Undo", group: "Editor", icon: <Undo2 className="w-4 h-4" />,
         keywords: "ctrl z revert history undo",
-        perform: () => {
-          const ed = activeEditorRef.current
-          if (ed) {
-            ed.focus()
-            ed.trigger("palette", "undo", null)
-          } else if (layout === "preview") {
-            setLayout("split")
-          }
-        },
+        perform: () => { const ed = activeEditorRef.current; if (ed) { ed.focus(); ed.trigger("palette", "undo", null) } },
       },
       {
-        id: "editor-redo",
-        label: "Redo",
-        group: "Editor",
-        icon: <Redo2 className="w-4 h-4" />,
+        id: "editor-redo", label: "Redo", group: "Editor", icon: <Redo2 className="w-4 h-4" />,
         keywords: "ctrl y ctrl shift z history redo",
-        perform: () => {
-          const ed = activeEditorRef.current
-          if (ed) {
-            ed.focus()
-            ed.trigger("palette", "redo", null)
-          } else if (layout === "preview") {
-            setLayout("split")
-          }
-        },
+        perform: () => { const ed = activeEditorRef.current; if (ed) { ed.focus(); ed.trigger("palette", "redo", null) } },
       },
-
+      { id: "action-import", label: "Import HTML file", group: "Actions", icon: <Upload className="w-4 h-4" />, keywords: "open upload load", perform: importCode },
+      { id: "action-download", label: "Download project", group: "Actions", icon: <Download className="w-4 h-4" />, keywords: "export save html", perform: downloadCode },
+      { id: "action-share", label: "Copy shareable link", group: "Actions", icon: <LinkIcon className="w-4 h-4" />, keywords: "url clipboard share", perform: copyShareLink },
       {
-        id: "action-import",
-        label: "Import HTML file",
-        group: "Actions",
-        icon: <Upload className="w-4 h-4" />,
-        keywords: "open upload load",
-        perform: importCode,
-      },
-      {
-        id: "action-download",
-        label: "Download project",
-        group: "Actions",
-        icon: <Download className="w-4 h-4" />,
-        keywords: "export save html",
-        perform: downloadCode,
-      },
-      {
-        id: "action-share",
-        label: "Copy shareable link",
-        group: "Actions",
-        icon: <LinkIcon className="w-4 h-4" />,
-        keywords: "url clipboard share",
-        perform: copyShareLink,
-      },
-      {
-        id: "action-open-tab",
-        label: "Open preview in new tab",
-        group: "Actions",
-        icon: <Maximize2 className="w-4 h-4" />,
+        id: "action-open-tab", label: "Open preview in new tab", group: "Actions", icon: <Maximize2 className="w-4 h-4" />,
         keywords: "window external browser",
-        perform: () => {
-          if (previewRef.current?.src) window.open(previewRef.current.src, "_blank")
-        },
+        perform: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") },
       },
       {
-        id: "action-fullscreen",
-        label: isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
-        group: "Actions",
-        icon: isFullscreen ? (
-          <Minimize2 className="w-4 h-4" />
-        ) : (
-          <Maximize2 className="w-4 h-4" />
-        ),
+        id: "action-fullscreen", label: isFullscreen ? "Exit fullscreen" : "Enter fullscreen", group: "Actions",
+        icon: isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />,
         keywords: "expand maximize zoom",
-        perform: handleFullscreenToggle,
+        perform: () => setIsFullscreen((v) => !v),
       },
       {
-        id: "action-theme",
-        label: theme === "light" ? "Switch to dark mode" : "Switch to light mode",
-        group: "Actions",
-        icon: theme === "light" ? (
-          <Moon className="w-4 h-4" />
-        ) : (
-          <Sun className="w-4 h-4" />
-        ),
+        id: "action-theme", label: theme === "light" ? "Switch to dark mode" : "Switch to light mode", group: "Actions",
+        icon: theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
         keywords: "appearance dark light color",
         perform: toggleTheme,
       },
-
       ...templates.map<Command>((t) => ({
-        id: `template-${t.id}`,
-        label: t.name,
-        description: t.description,
-        group: "Templates",
-        icon: t.icon,
+        id: `template-${t.id}`, label: t.name, description: t.description, group: "Templates", icon: t.icon,
         keywords: `template starter ${t.name}`,
         perform: () => loadTemplate(t),
       })),
     ]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, activeTab, theme, isFullscreen, code])
-
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -2102,42 +1749,144 @@ ${code.html}
     return () => window.removeEventListener("keydown", onKeyDown, true)
   }, [])
 
+  // ─── Shared editor panel ────────────────────────────────────────────────────
+  const EditorPanel = (
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as keyof CodeContent)} className="flex flex-col h-full">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 shrink-0">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="html">HTML</TabsTrigger>
+          <TabsTrigger value="css">CSS</TabsTrigger>
+          <TabsTrigger value="javascript">JS</TabsTrigger>
+        </TabsList>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <TabsContent value="html" className="h-full m-0">
+          <MonacoEditor language="html" value={code.html} onChange={(v) => handleCodeChange("html", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+        </TabsContent>
+        <TabsContent value="css" className="h-full m-0">
+          <MonacoEditor language="css" value={code.css} onChange={(v) => handleCodeChange("css", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+        </TabsContent>
+        <TabsContent value="javascript" className="h-full m-0">
+          <MonacoEditor language="javascript" value={code.javascript} onChange={(v) => handleCodeChange("javascript", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
+        </TabsContent>
+      </div>
+    </Tabs>
+  )
+
+  // ─── Shared preview panel ───────────────────────────────────────────────────
+  const PreviewPanel = (
+    <div className="flex flex-col h-full">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0 flex-wrap">
+        <Play className="w-4 h-4 text-green-600 shrink-0" />
+        <span className="font-medium text-sm text-gray-900 dark:text-white">Live Preview</span>
+        <Badge variant="secondary" className="text-xs shrink-0">{autoRun ? "Auto" : "Manual"}</Badge>
+        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setAutoRun(!autoRun)}>
+          {autoRun ? "Pause" : "Resume"}
+        </Button>
+        {!autoRun && (
+          <Button size="sm" className="h-7 text-xs" onClick={runCodeManually}>Run</Button>
+        )}
+      </div>
+      <div className={`flex-1 bg-white dark:bg-gray-900 relative ${isResizing ? "pointer-events-none" : ""}`}>
+        <iframe
+          ref={previewRef}
+          className="absolute inset-0 w-full h-full border-0"
+          title="Live Preview"
+          sandbox="allow-scripts allow-forms allow-popups allow-modals"
+        />
+        {isResizing && <div className="absolute inset-0 z-20" />}
+      </div>
+    </div>
+  )
+
+  // ─── Bottom nav items ───────────────────────────────────────────────────────
+  const bottomNavItems = [
+    { label: "Code", icon: <Code2 className="w-5 h-5" />, action: () => setLayout("code"), active: layout === "code" },
+    { label: "Split", icon: <Layout className="w-5 h-5" />, action: () => setLayout("split"), active: layout === "split" },
+    { label: "Preview", icon: <Play className="w-5 h-5" />, action: () => setLayout("preview"), active: layout === "preview" },
+    { label: "Save", icon: <Download className="w-5 h-5" />, action: downloadCode, active: false },
+    { label: "More", icon: <MoreHorizontal className="w-5 h-5" />, action: () => setMoreSheetOpen(true), active: moreSheetOpen },
+  ]
+
   return (
     <AppErrorBoundary>
     <>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
-      <div className={`h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
-        {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 w-full">
-           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer">
-                <Code2 className="w-6 h-6 text-blue-600" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Webify</h1>
+
+      {/* ── More sheet (mobile) ── */}
+      {moreSheetOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setMoreSheetOpen(false)}
+          />
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl px-4 pt-4 pb-8 animate-in slide-in-from-bottom-4 duration-200">
+            {/* Handle bar */}
+            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">More actions</span>
+              <button onClick={() => setMoreSheetOpen(false)} className="p-1 rounded-md text-gray-500">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Import file", icon: <Upload className="w-5 h-5" />, action: importCode },
+                { label: "Share link", icon: <LinkIcon className="w-5 h-5" />, action: copyShareLink },
+                { label: "Open in tab", icon: <Maximize2 className="w-5 h-5" />, action: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") } },
+                { label: isFullscreen ? "Exit fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />, action: () => { setIsFullscreen(v => !v); setMoreSheetOpen(false) } },
+                { label: "Command palette", icon: <Search className="w-5 h-5" />, action: () => { setMoreSheetOpen(false); setPaletteOpen(true) } },
+                { label: theme === "light" ? "Dark mode" : "Light mode", icon: theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />, action: () => { toggleTheme(); setMoreSheetOpen(false) } },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => { item.action(); setMoreSheetOpen(false) }}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 active:scale-95 transition-transform"
+                >
+                  <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Root container ── */}
+      <div className={`h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
+
+        {/* ── HEADER ── */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-3">
+
+            {/* Left: logo + template selector */}
+            <div className="flex items-center gap-2 min-w-0">
+              <Link href="/" className="flex items-center gap-1.5 shrink-0">
+                <Code2 className="w-5 h-5 text-blue-600" />
+                <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:block">Webify</span>
               </Link>
 
               <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-           <SelectTrigger className="w-[200px] sm:w-[210px] md:w-[240px] max-w-full min-w-0 overflow-hidden">
- <div className="flex items-center overflow-hidden min-w-0 w-full">
-  <span className="truncate block w-full">
-    <SelectValue placeholder="Choose template" />
-  </span>
-</div>
-</SelectTrigger>
+                <SelectTrigger className="w-36 sm:w-44 md:w-52 h-8 text-xs md:text-sm">
+                  <SelectValue placeholder="Template" />
+                </SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       <div className="flex items-center gap-2">
-                        <span className="shrink-0">{template.icon}</span>
-                        <div className="min-w-0">
-                          <div className="font-medium truncate">{template.name}</div>
-                          <div className="text-xs text-gray-500 truncate">{template.description}</div>
+                        {template.icon}
+                        <div>
+                          <div className="font-medium text-sm">{template.name}</div>
+                          <div className="text-xs text-gray-500 hidden sm:block">{template.description}</div>
                         </div>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
 
               <Button
                 variant="outline"
@@ -2149,32 +1898,44 @@ ${code.html}
                 <Search className="w-4 h-4 mr-2" />
                 Search commands...
                 <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
-                  ⌘K
+                  âŒ˜K
                 </kbd>
               </Button>
+
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Layout Controls */}
-              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                <Button variant={layout === "code" ? "default" : "ghost"} size="sm" onClick={() => setLayout("code")}>
-                  <Code2 className="w-4 h-4" />
-                </Button>
-                <Button variant={layout === "split" ? "default" : "ghost"} size="sm" onClick={() => setLayout("split")}>
-                  <Layout className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={layout === "preview" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setLayout("preview")}
-                >
-                  <Play className="w-4 h-4" />
-                </Button>
+            {/* Center: search (desktop only) */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPaletteOpen(true)}
+              className="hidden md:flex flex-1 max-w-xs justify-start text-gray-500 dark:text-gray-400 h-8 text-xs"
+            >
+              <Search className="w-3.5 h-3.5 mr-2" />
+              Search commands…
+              <kbd className="ml-auto rounded border border-gray-200 px-1.5 py-0.5 text-[10px] dark:border-gray-600">⌘K</kbd>
+            </Button>
+
+            {/* Right: desktop actions */}
+            <div className="hidden md:flex items-center gap-1.5">
+              {/* Layout group */}
+              <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                <Button variant={layout === "code" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("code")} title="Code only"><Code2 className="w-4 h-4" /></Button>
+                <Button variant={layout === "split" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("split")} title="Split view"><Layout className="w-4 h-4" /></Button>
+                <Button variant={layout === "preview" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("preview")} title="Preview only"><Play className="w-4 h-4" /></Button>
               </div>
+
+
+              <div className="w-px h-5 bg-gray-200 dark:bg-gray-600" />
 
               <Separator orientation="vertical" className="h-6" />
 
               {/* Action Buttons */}
+              <Button variant="outline" size="sm" onClick={formatCode}>
+                <Zap className="w-4 h-4 mr-2" />
+                Format
+              </Button>
+
               <Button variant="outline" size="sm" onClick={importCode}>
                 <Upload className="w-4 h-4 mr-2" />
                 Import
@@ -2199,21 +1960,71 @@ ${code.html}
                 }
               />
 
-              <Button variant="outline" size="sm" onClick={handleFullscreenToggle}>
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={importCode}><Upload className="w-3.5 h-3.5 mr-1.5" />Import</Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={downloadCode}><Download className="w-3.5 h-3.5 mr-1.5" />Download</Button>
+              <CopyButton text={shareUrl} />
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setIsFullscreen(!isFullscreen)}>
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleTheme}
-                title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              >
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
                 {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              </Button>
+            </div>
+
+            {/* Right: mobile compact actions */}
+            <div className="flex md:hidden items-center gap-1">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
+                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPaletteOpen(true)}>
+                <Search className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </header>
+
+
+
+        {/* ── MAIN WORKSPACE ── */}
+        <div
+          ref={containerRef}
+          className={`flex-1 overflow-hidden flex ${isMobile ? "flex-col" : "flex-row"}`}
+          // leave room for bottom nav on mobile
+          style={isMobile ? { paddingBottom: "56px" } : {}}
+        >
+          {/* Code panel */}
+          {(layout === "code" || layout === "split") && (
+            <div
+              style={
+                layout === "split"
+                  ? isMobile
+                    ? { height: `${splitRatio}%` }
+                    : { width: `${splitRatio}%` }
+                  : { flex: 1 }
+              }
+              className={`flex flex-col overflow-hidden shrink-0 ${!isMobile && layout === "split" ? "border-r border-gray-200 dark:border-gray-700" : ""}`}
+            >
+              {EditorPanel}
+            </div>
+          )}
+
+          {/* Resizer */}
+          {layout === "split" && (
+            <div
+              onMouseDown={() => { handleDragStart(); document.body.style.cursor = isMobile ? "row-resize" : "col-resize" }}
+              onTouchStart={handleDragStart}
+              onDragStart={(e) => e.preventDefault()}
+              className={`shrink-0 z-10 transition-colors ${
+                isMobile
+                  ? "h-2 w-full cursor-row-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
+                  : "w-2 h-full cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
+              }`}
+
+        
+
+
+
+
 
         {/* Main Container - Code Editor + Preview */}
         <div
@@ -2293,22 +2104,24 @@ ${code.html}
               onTouchStart={handleDragStart}
               onDragStart={(e) => e.preventDefault()}
               className="w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10"
+
             />
           )}
 
-          {/* PREVIEW PANEL */}
+          {/* Preview panel */}
           {(layout === "preview" || layout === "split") && (
             <PreviewErrorBoundary>
             <div
               style={
-                layout === "split" && !isMobile
-                  ? { width: `${100 - splitRatio}%` }
-                  : layout === "split" && isMobile
+                layout === "split"
+                  ? isMobile
                     ? { height: `${100 - splitRatio}%` }
-                    : { height: "100%", width: "100%" }
+                    : { width: `${100 - splitRatio}%` }
+                  : { flex: 1 }
               }
-              className="flex flex-col shrink-0 relative transition-none"
+              className="flex flex-col overflow-hidden shrink-0"
             >
+
               <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <Play className="w-4 h-4 text-green-600 shrink-0" />
@@ -2347,11 +2160,75 @@ ${code.html}
                   <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize" />
                 )}
               </div>
+              {/* Console Panel */}
+              <div className={`border-t border-gray-200 dark:border-gray-700 bg-gray-950 transition-all ${consoleOpen ? "h-36" : "h-8"}`}>
+                <div
+                  className="flex items-center justify-between px-3 h-8 cursor-pointer select-none"
+                  onClick={() => setConsoleOpen((o) => !o)}
+                >
+                  <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
+                    <span>Console</span>
+                    {consoleErrors.length > 0 && (
+                      <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                        {consoleErrors.length}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {consoleErrors.length > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConsoleErrors([]) }}
+                        className="text-[10px] text-gray-500 hover:text-gray-300"
+                      >
+                        Clear
+                      </button>
+                    )}
+                    <span className="text-gray-500 text-xs">{consoleOpen ? "▼" : "▲"}</span>
+                  </div>
+                </div>
+                {consoleOpen && (
+                  <div className="overflow-y-auto h-28 px-3 py-1 space-y-1">
+                    {consoleErrors.length === 0 ? (
+                      <p className="text-xs text-gray-500 font-mono">No errors</p>
+                    ) : (
+                      consoleErrors.map((err, i) => (
+                        <div key={i} className="text-xs font-mono text-red-400">
+                          {err.line ? `[${err.line}:${err.col}] ` : ""}{err.message}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+              {PreviewPanel}
             </div>
             </PreviewErrorBoundary>
           )}
         </div>
 
+        {/* ── MOBILE BOTTOM NAV ── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-stretch h-14">
+            {bottomNavItems.map((item) => (
+              <button
+                key={item.label}
+                onClick={item.action}
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors active:scale-95
+                  ${item.active
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-500 dark:text-gray-400"
+                  }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </nav>
 
       </div>
     </>
