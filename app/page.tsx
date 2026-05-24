@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 const safeBase64Encode = (str: string) =>
   btoa(unescape(encodeURIComponent(str)));
@@ -7,44 +7,27 @@ const safeBase64Decode = (str: string) =>
   decodeURIComponent(escape(atob(str)));
 
 import type React from "react"
-import { useState, useEffect, useMemo, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { CopyButton } from "@/components/ui/copy-button"
-import { CommandPalette, type Command } from "@/components/ui/command-palette"
 
 import {
   Code2,
   Play,
   Download,
-  Upload,
   Layout,
-  Maximize2,
-  Minimize2,
   FileText,
   Palette,
   Zap,
   Sun,
   Moon,
-  Search,
   Link as LinkIcon,
-  Undo2,
-  Redo2,
   Timer,
-  MoreHorizontal,
-  X,
 } from "lucide-react"
 
 import { toast } from "sonner"
 
-import { toast } from 'sonner'
-import * as prettier from 'prettier'
-import parserHtml from 'prettier/plugins/html'
-import parserCss from 'prettier/plugins/postcss'
-import parserBabel from 'prettier/plugins/babel'
-import parserEstree from 'prettier/plugins/estree'
 
 
 
@@ -145,10 +128,6 @@ const templates: Template[] = [
     icon: <Layout className="w-4 h-4" />,
     content: {
 
-      html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Landing Page</title></head><body><header class="header"><nav class="nav"><div class="logo">Brand</div></nav></header><main class="hero"><div class="hero-content"><h1>Welcome</h1><p>Build amazing things</p><button onclick="alert('Hello!')">Get Started</button></div></main></body></html>`,
-      css: `body{margin:0;font-family:'Segoe UI',sans-serif}.header{background:#130a2e;padding:1rem 2rem;position:fixed;width:100%;top:0;z-index:1000}.nav{display:flex;justify-content:space-between;align-items:center}.logo{color:white;font-size:1.5rem;font-weight:bold}.hero{height:100vh;background:#130a2e;display:flex;align-items:center;justify-content:center;text-align:center;color:white}.hero-content h1{font-size:4rem;margin-bottom:1rem}.hero-content p{color:#c5bedb;margin-bottom:2rem}.hero-content button{padding:1rem 2.5rem;border:none;border-radius:50px;cursor:pointer;font-weight:700;font-size:1.1rem}`,
-      javascript: `console.log('Landing page loaded!')`,
-
       html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -239,7 +218,7 @@ const templates: Template[] = [
             <p class="section-subtitle">Join thousands of developers and teams already building the future on our platform</p>
             <div class="testimonials-grid">
                 <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
+                    <div class="stars">★★★★★</div>
                     <p class="testimonial-text">"Brand has completely transformed our workflow. The setup was instant, and the interface is incredibly smooth. Deploying landing pages takes seconds now!"</p>
                     <div class="user-info">
                         <div class="avatar">SC</div>
@@ -250,7 +229,7 @@ const templates: Template[] = [
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
+                    <div class="stars">★★★★★</div>
                     <p class="testimonial-text">"The performance boost we saw after migrating to this platform was unbelievable. Plus, the built-in analytics are actually useful rather than bloated."</p>
                     <div class="user-info">
                         <div class="avatar">DM</div>
@@ -261,7 +240,7 @@ const templates: Template[] = [
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
+                    <div class="stars">★★★★★</div>
                     <p class="testimonial-text">"Support is responsive, the documentation is clear, and the developer experience is unmatched. I can't recommend this platform enough."</p>
                     <div class="user-info">
                         <div class="avatar">ER</div>
@@ -1108,8 +1087,6 @@ document.head.appendChild(floatStyle);`,
   },
 ]
 
-type LayoutType = "split" | "preview" | "code"
-
 export default function CodeEditor() {
   const [code, setCode] = useState<CodeContent>(() => {
     if (typeof window === "undefined") return templates[0].content
@@ -1117,283 +1094,23 @@ export default function CodeEditor() {
       const urlParams = new URLSearchParams(window.location.search)
       const sharedCode = urlParams.get("code")
       if (sharedCode) return JSON.parse(safeBase64Decode(sharedCode)) as CodeContent
-
-    } catch {}
-
     } catch {
-      // invalid share URL â€” fall through
+      // ignore invalid share URL
     }
 
     try {
       const saved = localStorage.getItem("webify_code")
       if (saved) return JSON.parse(saved) as CodeContent
-
-    } catch {}
-
     } catch {
-      // corrupted storage â€” fall through
+      // ignore corrupted local storage
     }
 
     return templates[0].content
   })
 
-  const [layout, setLayout] = useState<LayoutType>("split")
   const [activeTab, setActiveTab] = useState<keyof CodeContent>("html")
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [paletteOpen, setPaletteOpen] = useState(false)
-  const [autoRun, setAutoRun] = useState(true)
-  const [splitRatio, setSplitRatio] = useState(50)
-  const [isResizing, setIsResizing] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-
-  const [consoleErrors, setConsoleErrors] = useState<Array<{message: string; line?: number; col?: number}>>([])
-  const [consoleOpen, setConsoleOpen] = useState(false)
-
-
-  const [moreSheetOpen, setMoreSheetOpen] = useState(false)
-  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
-
-
-
-  // use effect for handling full screen mode
-  useEffect(() => {
-  const checkMobile = () => setIsMobile(window.innerWidth < 768)
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-  return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "WEBIFY_ERROR") {
-        setConsoleErrors((prev) => [...prev, {
-          message: event.data.message,
-          line: event.data.line,
-          col: event.data.col,
-        }])
-        setConsoleOpen(true)
-      }
-    }
-  window.addEventListener("message", handleMessage)
-  return () => window.removeEventListener("message", handleMessage)
-  }, [])
-
-  useEffect(() => {
-
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  const handleFullscreenToggle = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        }
-      }
-    } catch (err) {
-      console.error("Error attempting to toggle fullscreen:", err);
-      setIsFullscreen((prev) => !prev);
-    }
-  };
-
-const containerRef = useRef<HTMLDivElement>(null)
-const previewRef = useRef<HTMLIFrameElement>(null)
-
-const [isMobile, setIsMobile] = useState(false)
-
-useEffect(() => {
-  const updateIsMobile = () => {
-    setIsMobile(window.innerWidth < 768)
-  }
-
-  updateIsMobile()
-  window.addEventListener("resize", updateIsMobile)
-
-  return () => {
-    window.removeEventListener("resize", updateIsMobile)
-  }
-}, [])
-
-
-// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
-const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
-
-
-// Typed to match the IStandaloneCodeEditor instance from monaco-editor.tsx
-const activeEditorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null)
-
-
-
-const handleDragStart = () => {
-  isDragging.current = true;
-  setIsResizing(true);
-  document.body.style.userSelect = "none";
-};
-
-const handleDragMove = useCallback((clientX: number, clientY: number) => {
-  if (!isDragging.current || !containerRef.current) return;
-
-  const rect = containerRef.current.getBoundingClientRect();
-
-  let newRatio;
-  if (isMobile) {
-    newRatio = ((clientY - rect.top) / rect.height) * 100;
-  } else {
-    newRatio = ((clientX - rect.left) / rect.width) * 100;
-  }
-
-  const clampedRatio = Math.max(20, Math.min(80, newRatio));
-  setSplitRatio(clampedRatio);
-}, [isMobile]);
-
-const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
-  handleDragMove(e.clientX, e.clientY);
-}, [handleDragMove]);
-
-const handleTouchMove = useCallback((e: globalThis.TouchEvent) => {
-  if (isDragging.current) {
-    handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
-  }
-}, [handleDragMove]);
-
-const handleDragEnd = useCallback(() => {
-  isDragging.current = false;
-  setIsResizing(false);
-  document.body.style.userSelect = "auto";
-  document.body.style.cursor = "default";
-}, []);
-
-  // Tracks which template is currently active
-  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
-  const formatCode = useCallback(async () => {
-  try {
-    let formatted: string
-    const current = code[activeTab]
-
-    if (activeTab === 'html') {
-      formatted = await prettier.format(current, {
-        parser: 'html',
-        plugins: [parserHtml],
-      })
-    } else if (activeTab === 'css') {
-      formatted = await prettier.format(current, {
-        parser: 'css',
-        plugins: [parserCss],
-      })
-    } else {
-      formatted = await prettier.format(current, {
-        parser: 'babel',
-        plugins: [parserBabel, parserEstree],
-      })
-    }
-
-    setCode((prev) => ({ ...prev, [activeTab]: formatted }))
-    toast.success(`${activeTab.toUpperCase()} formatted successfully`)
-  } catch {
-    toast.error('Could not format code â€” check for syntax errors')
-  }
-}, [activeTab, code])
-
-  // Per-template memory: stores the user's last-edited code for each template
-
-  const [templateSnapshots, setTemplateSnapshots] = useState<Record<string, CodeContent>>(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const saved = localStorage.getItem("webify_template_snapshots")
-      if (saved) return JSON.parse(saved) as Record<string, CodeContent>
-
-    } catch {}
-
-    } catch {
-      // corrupted storage â€” fall through
-    }
-
-    return {}
-  })
-
-  const isDragging = useRef(false)
-  const containerRef = useRef<HTMLDivElement>(null)
   const previewRef = useRef<HTMLIFrameElement>(null)
-  const activeEditorRef = useRef<any>(null)
-  const codeRef = useRef<CodeContent>(code)
-
-  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
-
-  // Keep mobile state in sync
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  // Keep codeRef fresh
-  useEffect(() => { codeRef.current = code }, [code])
-
-
-  const codeRef = useRef<CodeContent>(code)
-  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
-  // Keep codeRef in sync so beforeunload always has the latest values
-
-
-  // Save template snapshots
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try { localStorage.setItem("webify_template_snapshots", JSON.stringify(templateSnapshots)) } catch {}
-
-
-  // Auto-save code to localStorage, debounced 500ms
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem('webify_code', JSON.stringify(code))
-      } catch (err) {
-        // QuotaExceededError â€” localStorage full, fail silently
-        console.warn('Webify: auto-save failed', err)
-      }
-
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [templateSnapshots])
-
-
-  // Column resizer: start dragging handler for desktop resizer
-  const handleMouseDown = () => {
-    handleDragStart()
-    document.body.style.cursor = "col-resize"
-  }
-
-
-  // Theme init
-
-
-
-  // Auto-save per-template snapshots to localStorage, debounced 500ms
-useEffect(() => {
-  const timer = setTimeout(() => {
-    try {
-      localStorage.setItem('webify_template_snapshots', JSON.stringify(templateSnapshots))
-    } catch (err) {
-      console.warn('Webify: template snapshot save failed', err)
-    }
-  }, 500)
-  return () => clearTimeout(timer)
-}, [templateSnapshots])
-
-  // empty deps â€” registers once, codeRef keeps values fresh
-  // Initialize theme from storage/preferences on mount
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null
@@ -1407,289 +1124,43 @@ useEffect(() => {
     }
   }, [])
 
-  const toggleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark")
-      document.documentElement.classList.add("dark")
-      localStorage.setItem("theme", "dark")
-    } else {
-      setTheme("light")
-      document.documentElement.classList.remove("dark")
-      localStorage.setItem("theme", "light")
-    }
-  }
-
-  // Drag handlers
-  const handleDragStart = useCallback(() => {
-    isDragging.current = true
-    setIsResizing(true)
-    document.body.style.userSelect = "none"
-  }, [])
-
-  const handleDragMove = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging.current || !containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    let newRatio: number
-    if (isMobile) {
-      newRatio = ((clientY - rect.top) / rect.height) * 100
-    } else {
-      newRatio = ((clientX - rect.left) / rect.width) * 100
-    }
-    setSplitRatio(Math.max(20, Math.min(80, newRatio)))
-  }, [isMobile])
-
-  const handleDragEnd = useCallback(() => {
-    isDragging.current = false
-    setIsResizing(false)
-    document.body.style.userSelect = "auto"
-    document.body.style.cursor = "default"
-  }, [])
-
-  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => handleDragMove(e.clientX, e.clientY), [handleDragMove])
-  const handleTouchMove = useCallback((e: globalThis.TouchEvent) => {
-    if (isDragging.current) {
-      e.preventDefault()
-      handleDragMove(e.touches[0].clientX, e.touches[0].clientY)
-    }
-  }, [handleDragMove])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem("webify_code", JSON.stringify(code))
+      } catch {
+        // ignore storage quota errors
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [code])
 
   useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove)
-    window.addEventListener("mouseup", handleDragEnd)
-    window.addEventListener("touchmove", handleTouchMove, { passive: false })
-    window.addEventListener("touchend", handleDragEnd)
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("mouseup", handleDragEnd)
-      window.removeEventListener("touchmove", handleTouchMove)
-      window.removeEventListener("touchend", handleDragEnd)
-    }
-  }, [handleMouseMove, handleTouchMove, handleDragEnd])
-
-
-    // Show validation errors immediately — no debounce needed here since
-    // we are only setting srcdoc, not rebuilding the full iframe.
-
-  // Preview rendering
-  useEffect(() => {
-    if (!previewRef.current || !autoRun) return
-
-    if (!htmlValidation.isValid) {
-      previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
-      return
-    }
-
-
-    // Debounce the iframe rebuild by 400ms so the preview only refreshes
-    // after the user pauses typing, not on every single keystroke.
-    // This prevents: flickering, animation/timer resets mid-keystroke,
-    // and unnecessary CPU churn during fast typing.
-    // 400ms matches CodePen's debounce — fast enough to feel live,
-    // long enough to batch rapid keystrokes into one render.
-    const debounceTimer = setTimeout(() => {
-      if (!previewRef.current) return
-
-      const combinedCode = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Live Preview</title>
-          <style>${code.css}</style>
-        </head>
-        <body>
-          ${code.html}
-          <script>
-            (function() {
-              var _killTimer = setTimeout(function() {
-                document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">&#9888;&#65039; Script timed out after 5 seconds — possible infinite loop.</div>';
-              }, 5000);
-              try {
-                ${code.javascript}
-              } catch(e) {
-                clearTimeout(_killTimer);
-                var el = document.createElement('div');
-                el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-                el.textContent = '&#9888;&#65039; JS Error: ' + e.message;
-                document.body.appendChild(el);
-                return;
-              }
-              clearTimeout(_killTimer);
-            })();
-          <\/script>
-        </body>
-        </html>
-      `
-
-      const blob = new Blob([combinedCode], { type: "text/html" })
-      const url = URL.createObjectURL(blob)
-      previewRef.current.src = url
-
-      // Revoke the blob URL after the iframe has loaded it,
-      // preventing object URL leaks on every keystroke.
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    }, 400)
-
-    // Cancel the pending rebuild if code changes again before 400ms elapses.
-    // Only the last keystroke in a burst will actually trigger a refresh.
-    return () => clearTimeout(debounceTimer)
-
-    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
-
-    const combinedCode = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Live Preview</title>
-        <style>${code.css}</style>
-      </head>
-      <body>
-        ${code.html}
-        <script>
-          (function() {
-            window.onerror = function(msg, src, line, col) {
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
-              return true;
-            };
-            var _origConsoleError = console.error;
-            console.error = function() {
-              var msg = Array.prototype.slice.call(arguments).join(' ');
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
-              _origConsoleError.apply(console, arguments);
-            };
-            var _killTimer = setTimeout(function() {
-
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
-
-              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
-
-            }, 5000);
-            try {
-              ${code.javascript}
-            } catch(e) {
-              clearTimeout(_killTimer);
-
-              window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
-
-              var el = document.createElement('div');
-              el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-              el.textContent = 'âš ï¸ JS Error: ' + e.message;
-              document.body.appendChild(el);
-
-              return;
-            }
-            clearTimeout(_killTimer);
-          })();
-        <\/script>
-      </body>
-      </html>
-    `
-    setConsoleErrors([])
-    const blob = new Blob([combinedCode], { type: "text/html" })    
-    
-    
-
-    const blob = new Blob([combinedCode], { type: "text/html" })
-
-    const url = URL.createObjectURL(blob)
-    previewRef.current.src = url
-    return () => URL.revokeObjectURL(url)
-
-  }, [code, htmlValidation, autoRun])
-
-  const runCodeManually = () => {
     if (!previewRef.current) return
+    const htmlValidation = validateHtmlSyntax(code.html)
     if (!htmlValidation.isValid) {
       previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
 
-    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Preview</title><style>${code.css}</style></head><body>${code.html}<script>(function(){var k=setTimeout(function(){document.body.innerHTML='<div style="padding:20px;color:red;font-family:monospace;">⚠️ Script timed out.</div>'},5000);try{${code.javascript}}catch(e){clearTimeout(k);var el=document.createElement('div');el.style.cssText='padding:20px;color:red;font-family:monospace;';el.textContent='⚠️ JS Error: '+e.message;document.body.appendChild(el);return}clearTimeout(k)})()</\script></body></html>`
-
-
-    const combinedCode = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Live Preview</title>
-      <style>${code.css}</style>
-    </head>
-    <body>
-      ${code.html}
-      <script>
-        (function() {
-          window.onerror = function(msg, src, line, col) {
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: String(msg), line: line, col: col }, '*');
-            return true;
-          };
-          var _origConsoleError = console.error;
-          console.error = function() {
-            var msg = Array.prototype.slice.call(arguments).join(' ');
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: msg }, '*');
-            _origConsoleError.apply(console, arguments);
-          };
-          var _killTimer = setTimeout(function() {
-
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: 'Script timed out after 5 seconds — possible infinite loop.' }, '*');
-
-            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">âš ï¸ Script timed out after 5 seconds â€” possible infinite loop.</div>';
-
-          }, 5000);
-          try {
-            ${code.javascript}
-          } catch(e) {
-            clearTimeout(_killTimer);
-
-            window.parent.postMessage({ type: 'WEBIFY_ERROR', message: e.message }, '*');
-
-            var el = document.createElement('div');
-            el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-            el.textContent = 'âš ï¸ JS Error: ' + e.message;
-            document.body.appendChild(el);
-
-            return;
-          }
-          clearTimeout(_killTimer);
-        })();
-      <\/script>
-    </body>
-    </html>
-  `
-
-    setConsoleErrors([])
-
-
-
-
-    const blob = new Blob([combinedCode], { type: "text/html" })
-
-    
-    const url = URL.createObjectURL(blob)
-    previewRef.current.src = url
-  }
+    const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${code.css}</style></head><body>${code.html}<script>(function(){try{${code.javascript}}catch(e){var el=document.createElement('div');el.style.cssText='padding:12px;color:#b91c1c;font-family:monospace;';el.textContent='JS Error: '+e.message;document.body.appendChild(el)}})()<\/script></body></html>`
+    previewRef.current.srcdoc = combinedCode
+  }, [code])
 
   const handleCodeChange = (language: keyof CodeContent, value: string) => {
     setCode((prev) => ({ ...prev, [language]: value }))
   }
 
-  const loadTemplate = (template: Template) => {
-    if (currentTemplateId) {
-      setTemplateSnapshots((prev) => ({ ...prev, [currentTemplateId]: code }))
-    }
-    const savedSnapshot = templateSnapshots[template.id]
-    setCode(savedSnapshot ?? template.content)
-    setCurrentTemplateId(template.id)
-    toast("Template loaded", { description: `${template.name} template loaded.` })
+  const loadTemplate = (templateId: string) => {
+    const template = templates.find((t) => t.id === templateId)
+    if (!template) return
+    setCode(template.content)
+    toast.success(`${template.name} loaded`)
   }
 
   const downloadCode = async () => {
     const zip = new JSZip()
-    zip.file("index.html", `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>My Project</title>\n    <link rel="stylesheet" href="style.css">\n</head>\n<body>\n${code.html}\n    <script src="script.js"></script>\n</body>\n</html>`)
+    zip.file("index.html", code.html)
     zip.file("style.css", code.css)
     zip.file("script.js", code.javascript)
     const blob = await zip.generateAsync({ type: "blob" })
@@ -1699,705 +1170,91 @@ useEffect(() => {
     a.download = "webify-project.zip"
     document.body.appendChild(a)
     a.click()
-    document.body.removeChild(a)
+    a.remove()
     URL.revokeObjectURL(url)
-    toast("Download started", { description: "Saved as webify-project.zip" })
-  }
-
-  const importCode = () => {
-    const input = document.createElement("input")
-    input.type = "file"
-    input.accept = ".html"
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const content = e.target?.result as string
-          const htmlMatch = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-          const cssMatch = content.match(/<style[^>]*>([\s\S]*?)<\/style>/i)
-          const jsMatch = content.match(/<script[^>]*>([\s\S]*?)<\/script>/i)
-          setCode({
-            html: htmlMatch ? htmlMatch[1].trim() : "",
-            css: cssMatch ? cssMatch[1].trim() : "",
-            javascript: jsMatch ? jsMatch[1].trim() : "",
-          })
-          toast("File imported", { description: "HTML file imported." })
-        }
-        reader.readAsText(file)
-      }
-    }
-    input.click()
   }
 
   const copyShareLink = async () => {
-    if (typeof window === "undefined") return
     try {
-      const url = `${window.location.origin}?code=${safeBase64Encode(JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }))}`
-      await navigator.clipboard.writeText(url)
-      toast("Link copied", { description: "Shareable link copied to clipboard." })
+      const share = `${window.location.origin}?code=${safeBase64Encode(JSON.stringify(code))}`
+      await navigator.clipboard.writeText(share)
+      toast.success("Share link copied")
     } catch {
-      toast.error("Copy failed", { description: "Could not copy the share link." })
+      toast.error("Could not copy share link")
     }
   }
 
-  // Load shared code from URL on mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const sharedCode = urlParams.get("code")
-    if (sharedCode) {
-      try {
-        const decoded = JSON.parse(safeBase64Decode(sharedCode))
-        setCode(decoded)
-        toast("Shared code loaded", { description: "Shared code loaded." })
-      } catch {
-        toast.error("Invalid share link", { description: "Could not load shared code." })
-      }
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light"
+    setTheme(next)
+    if (next === "dark") {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
     }
-  }, [])
-
-  // Share URL for CopyButton
-  const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}?code=${safeBase64Encode(JSON.stringify({ html: code.html, css: code.css, javascript: code.javascript }))}`
-    : ""
-
-  const commands = useMemo<Command[]>(() => {
-    const layoutCmd = (id: string, label: string, value: LayoutType, icon: React.ReactNode): Command => ({
-      id, label, group: "Layout", icon,
-      keywords: "view layout panel",
-      description: layout === value ? "Active" : undefined,
-      perform: () => setLayout(value),
-    })
-    const tabCmd = (id: string, label: string, value: keyof CodeContent, icon: React.ReactNode): Command => ({
-      id, label, group: "Editor", icon,
-      keywords: "tab file language",
-      description: activeTab === value ? "Active" : undefined,
-      perform: () => { setActiveTab(value); if (layout === "preview") setLayout("split") },
-    })
-    return [
-      layoutCmd("layout-code", "Code only", "code", <Code2 className="w-4 h-4" />),
-      layoutCmd("layout-split", "Split view", "split", <Layout className="w-4 h-4" />),
-      layoutCmd("layout-preview", "Preview only", "preview", <Play className="w-4 h-4" />),
-      tabCmd("tab-html", "Go to HTML", "html", <FileText className="w-4 h-4" />),
-      tabCmd("tab-css", "Go to CSS", "css", <Palette className="w-4 h-4" />),
-      tabCmd("tab-js", "Go to JavaScript", "javascript", <Zap className="w-4 h-4" />),
-      {
-        id: "editor-undo", label: "Undo", group: "Editor", icon: <Undo2 className="w-4 h-4" />,
-        keywords: "ctrl z revert history undo",
-        perform: () => { const ed = activeEditorRef.current; if (ed) { ed.focus(); ed.trigger("palette", "undo", null) } },
-      },
-      {
-        id: "editor-redo", label: "Redo", group: "Editor", icon: <Redo2 className="w-4 h-4" />,
-        keywords: "ctrl y ctrl shift z history redo",
-        perform: () => { const ed = activeEditorRef.current; if (ed) { ed.focus(); ed.trigger("palette", "redo", null) } },
-      },
-      { id: "action-import", label: "Import HTML file", group: "Actions", icon: <Upload className="w-4 h-4" />, keywords: "open upload load", perform: importCode },
-      { id: "action-download", label: "Download project", group: "Actions", icon: <Download className="w-4 h-4" />, keywords: "export save html", perform: downloadCode },
-      { id: "action-share", label: "Copy shareable link", group: "Actions", icon: <LinkIcon className="w-4 h-4" />, keywords: "url clipboard share", perform: copyShareLink },
-      {
-        id: "action-open-tab", label: "Open preview in new tab", group: "Actions", icon: <Maximize2 className="w-4 h-4" />,
-        keywords: "window external browser",
-        perform: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") },
-      },
-      {
-        id: "action-fullscreen", label: isFullscreen ? "Exit fullscreen" : "Enter fullscreen", group: "Actions",
-        icon: isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />,
-        keywords: "expand maximize zoom",
-        perform: () => setIsFullscreen((v) => !v),
-      },
-      {
-        id: "action-theme", label: theme === "light" ? "Switch to dark mode" : "Switch to light mode", group: "Actions",
-        icon: theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />,
-        keywords: "appearance dark light color",
-        perform: toggleTheme,
-      },
-      ...templates.map<Command>((t) => ({
-        id: `template-${t.id}`, label: t.name, description: t.description, group: "Templates", icon: t.icon,
-        keywords: `template starter ${t.name}`,
-        perform: () => loadTemplate(t),
-      })),
-    ]
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, activeTab, theme, isFullscreen, code])
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault()
-        e.stopPropagation()
-        setPaletteOpen((open) => !open)
-      }
-    }
-    window.addEventListener("keydown", onKeyDown, true)
-    return () => window.removeEventListener("keydown", onKeyDown, true)
-  }, [])
-
-  // ─── Shared editor panel ────────────────────────────────────────────────────
-  const EditorPanel = (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as keyof CodeContent)} className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 shrink-0">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="html">HTML</TabsTrigger>
-          <TabsTrigger value="css">CSS</TabsTrigger>
-          <TabsTrigger value="javascript">JS</TabsTrigger>
-        </TabsList>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <TabsContent value="html" className="h-full m-0">
-          <MonacoEditor language="html" value={code.html} onChange={(v) => handleCodeChange("html", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-        <TabsContent value="css" className="h-full m-0">
-          <MonacoEditor language="css" value={code.css} onChange={(v) => handleCodeChange("css", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-        <TabsContent value="javascript" className="h-full m-0">
-          <MonacoEditor language="javascript" value={code.javascript} onChange={(v) => handleCodeChange("javascript", v)} theme={theme} onEditorReady={(ed) => (activeEditorRef.current = ed)} />
-        </TabsContent>
-      </div>
-    </Tabs>
-  )
-
-  // ─── Shared preview panel ───────────────────────────────────────────────────
-  const PreviewPanel = (
-    <div className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0 flex-wrap">
-        <Play className="w-4 h-4 text-green-600 shrink-0" />
-        <span className="font-medium text-sm text-gray-900 dark:text-white">Live Preview</span>
-        <Badge variant="secondary" className="text-xs shrink-0">{autoRun ? "Auto" : "Manual"}</Badge>
-        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setAutoRun(!autoRun)}>
-          {autoRun ? "Pause" : "Resume"}
-        </Button>
-        {!autoRun && (
-          <Button size="sm" className="h-7 text-xs" onClick={runCodeManually}>Run</Button>
-        )}
-      </div>
-      <div className={`flex-1 bg-white dark:bg-gray-900 relative ${isResizing ? "pointer-events-none" : ""}`}>
-        <iframe
-          ref={previewRef}
-          className="absolute inset-0 w-full h-full border-0"
-          title="Live Preview"
-          sandbox="allow-scripts allow-forms allow-popups allow-modals"
-        />
-        {isResizing && <div className="absolute inset-0 z-20" />}
-      </div>
-    </div>
-  )
-
-  // ─── Bottom nav items ───────────────────────────────────────────────────────
-  const bottomNavItems = [
-    { label: "Code", icon: <Code2 className="w-5 h-5" />, action: () => setLayout("code"), active: layout === "code" },
-    { label: "Split", icon: <Layout className="w-5 h-5" />, action: () => setLayout("split"), active: layout === "split" },
-    { label: "Preview", icon: <Play className="w-5 h-5" />, action: () => setLayout("preview"), active: layout === "preview" },
-    { label: "Save", icon: <Download className="w-5 h-5" />, action: downloadCode, active: false },
-    { label: "More", icon: <MoreHorizontal className="w-5 h-5" />, action: () => setMoreSheetOpen(true), active: moreSheetOpen },
-  ]
+    localStorage.setItem("theme", next)
+  }
 
   return (
     <AppErrorBoundary>
-    <>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
-
-      {/* ── More sheet (mobile) ── */}
-      {moreSheetOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setMoreSheetOpen(false)}
-          />
-          {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl px-4 pt-4 pb-8 animate-in slide-in-from-bottom-4 duration-200">
-            {/* Handle bar */}
-            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">More actions</span>
-              <button onClick={() => setMoreSheetOpen(false)} className="p-1 rounded-md text-gray-500">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Import file", icon: <Upload className="w-5 h-5" />, action: importCode },
-                { label: "Share link", icon: <LinkIcon className="w-5 h-5" />, action: copyShareLink },
-                { label: "Open in tab", icon: <Maximize2 className="w-5 h-5" />, action: () => { if (previewRef.current?.src) window.open(previewRef.current.src, "_blank") } },
-                { label: isFullscreen ? "Exit fullscreen" : "Fullscreen", icon: isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />, action: () => { setIsFullscreen(v => !v); setMoreSheetOpen(false) } },
-                { label: "Command palette", icon: <Search className="w-5 h-5" />, action: () => { setMoreSheetOpen(false); setPaletteOpen(true) } },
-                { label: theme === "light" ? "Dark mode" : "Light mode", icon: theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />, action: () => { toggleTheme(); setMoreSheetOpen(false) } },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => { item.action(); setMoreSheetOpen(false) }}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 active:scale-95 transition-transform"
-                >
-                  <span className="text-gray-500 dark:text-gray-400">{item.icon}</span>
-                  {item.label}
-                </button>
+      <div className="h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-1.5 mr-2">
+            <Code2 className="w-5 h-5 text-blue-600" />
+            <span className="font-bold text-gray-900 dark:text-white">Webify</span>
+          </Link>
+          <Select onValueChange={loadTemplate}>
+            <SelectTrigger className="w-48 h-8 text-sm">
+              <SelectValue placeholder="Choose template" />
+            </SelectTrigger>
+            <SelectContent>
+              {templates.map((template) => (
+                <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
               ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Root container ── */}
-      <div className={`h-[100dvh] flex flex-col bg-gray-50 dark:bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}>
-
-        {/* ── HEADER ── */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shrink-0">
-          <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2 md:py-3">
-
-            {/* Left: logo + template selector */}
-            <div className="flex items-center gap-2 min-w-0">
-              <Link href="/" className="flex items-center gap-1.5 shrink-0">
-                <Code2 className="w-5 h-5 text-blue-600" />
-                <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:block">Webify</span>
-              </Link>
-
-              <Select onValueChange={(value) => loadTemplate(templates.find((t) => t.id === value)!)}>
-                <SelectTrigger className="w-36 sm:w-44 md:w-52 h-8 text-xs md:text-sm">
-                  <SelectValue placeholder="Template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      <div className="flex items-center gap-2">
-                        {template.icon}
-                        <div>
-                          <div className="font-medium text-sm">{template.name}</div>
-                          <div className="text-xs text-gray-500 hidden sm:block">{template.description}</div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPaletteOpen(true)}
-                title="Command palette (Ctrl/Cmd + K)"
-                className="hidden sm:flex w-72 justify-start text-gray-500 dark:text-gray-400"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Search commands...
-                <kbd className="ml-auto hidden rounded border border-gray-200 px-1.5 py-0.5 text-[10px] sm:inline-block dark:border-gray-600">
-                  âŒ˜K
-                </kbd>
-              </Button>
-
-            </div>
-
-            {/* Center: search (desktop only) */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPaletteOpen(true)}
-              className="hidden md:flex flex-1 max-w-xs justify-start text-gray-500 dark:text-gray-400 h-8 text-xs"
-            >
-              <Search className="w-3.5 h-3.5 mr-2" />
-              Search commands…
-              <kbd className="ml-auto rounded border border-gray-200 px-1.5 py-0.5 text-[10px] dark:border-gray-600">⌘K</kbd>
-            </Button>
-
-            {/* Right: desktop actions */}
-            <div className="hidden md:flex items-center gap-1.5">
-              {/* Layout group */}
-              <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
-                <Button variant={layout === "code" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("code")} title="Code only"><Code2 className="w-4 h-4" /></Button>
-                <Button variant={layout === "split" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("split")} title="Split view"><Layout className="w-4 h-4" /></Button>
-                <Button variant={layout === "preview" ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0" onClick={() => setLayout("preview")} title="Preview only"><Play className="w-4 h-4" /></Button>
-              </div>
-
-
-              <div className="w-px h-5 bg-gray-200 dark:bg-gray-600" />
-
-              <Separator orientation="vertical" className="h-6" />
-
-              {/* Action Buttons */}
-              <Button variant="outline" size="sm" onClick={formatCode}>
-                <Zap className="w-4 h-4 mr-2" />
-                Format
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={importCode}>
-                <Upload className="w-4 h-4 mr-2" />
-                Import
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={downloadCode}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-
-              <CopyButton
-                text={
-                  typeof window !== "undefined"
-                    ? `${window.location.origin}?code=${safeBase64Encode(
-                      JSON.stringify({
-                        html: code.html,
-                        css: code.css,
-                        javascript: code.javascript,
-                      })
-                    )}`
-                    : ""
-                }
-              />
-
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={importCode}><Upload className="w-3.5 h-3.5 mr-1.5" />Import</Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={downloadCode}><Download className="w-3.5 h-3.5 mr-1.5" />Download</Button>
-              <CopyButton text={shareUrl} />
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setIsFullscreen(!isFullscreen)}>
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              </Button>
-            </div>
-
-            {/* Right: mobile compact actions */}
-            <div className="flex md:hidden items-center gap-1">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={toggleTheme}>
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => setPaletteOpen(true)}>
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
+            </SelectContent>
+          </Select>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={copyShareLink}><LinkIcon className="w-4 h-4 mr-1" />Share</Button>
+            <Button variant="outline" size="sm" onClick={downloadCode}><Download className="w-4 h-4 mr-1" />Download</Button>
+            <Button variant="outline" size="sm" onClick={toggleTheme}>{theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}</Button>
           </div>
         </header>
 
-
-
-        {/* ── MAIN WORKSPACE ── */}
-        <div
-          ref={containerRef}
-          className={`flex-1 overflow-hidden flex ${isMobile ? "flex-col" : "flex-row"}`}
-          // leave room for bottom nav on mobile
-          style={isMobile ? { paddingBottom: "56px" } : {}}
-        >
-          {/* Code panel */}
-          {(layout === "code" || layout === "split") && (
-          
-            <div
-              style={
-                
-                layout === "split"
-
-                  ? {
-                    
-                    width: isMobile ? "100%" : `${splitRatio}%`,
-                    height: isMobile ? `${splitRatio}%` : "100%",
-                  }
-                  : { height: "100%", width: "100%" }
-              }
-              className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
-
-
-                  ? isMobile
-                    ? { height: `${splitRatio}%` }
-                    : { width: `${splitRatio}%` }
-                  : { flex: 1 }
-              }
-              className={`flex flex-col overflow-hidden shrink-0 ${!isMobile && layout === "split" ? "border-r border-gray-200 dark:border-gray-700" : ""}`}
-
-            >
-              {EditorPanel}
-            </div>
-          )}
-
-          {/* Resizer */}
-          {layout === "split" && (
-            <div
-              onMouseDown={() => { handleDragStart(); document.body.style.cursor = isMobile ? "row-resize" : "col-resize" }}
-              onTouchStart={handleDragStart}
-              onDragStart={(e) => e.preventDefault()}
-
-              className="w-full h-3 md:w-2 md:h-full cursor-row-resize md:cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10 flex items-center justify-center touch-none"
-            >
-              <div className="flex md:flex-col gap-1">
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
-                <div className="w-1 h-1 rounded-full bg-gray-500 dark:bg-gray-400"></div>
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
+          <EditorErrorBoundary>
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as keyof CodeContent)} className="flex-1 flex flex-col overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2">
+                <TabsList>
+                  <TabsTrigger value="html">HTML</TabsTrigger>
+                  <TabsTrigger value="css">CSS</TabsTrigger>
+                  <TabsTrigger value="javascript">JS</TabsTrigger>
+                </TabsList>
               </div>
-            </div>
-          )}
-
-          {/* PREVIEW */}
-          {(layout === "preview" || layout === "split") && (
-            <div
-              style={layout === "split"
-                ? {
-                  width: isMobile ? "100%" : `${100 - splitRatio}%`,
-                  height: isMobile ? `${100 - splitRatio}%` : "100%",
-                }
-                : { height: "100%", width: "100%" }
-              }
-              className="flex flex-col shrink-0 relative transition-none"
-
-            >
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between overflow-x-auto scrollbar-hide shrink-0">
-                <div className="flex items-center gap-2 min-w-max">
-                  <Play className="w-4 h-4 text-green-600 shrink-0" />
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    Live Preview
-                  </span>
-
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    {autoRun ? "Auto-refresh" : "Manual"}
-                  </Badge>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoRun(!autoRun)}
-                    className="shrink-0"
-                  >
-                    {autoRun ? "Pause" : "Resume"}
-                  </Button>
-
-                  {!autoRun && (
-                    <Button size="sm" onClick={runCodeManually} className="shrink-0">
-                      Run
-                    </Button>
-                  )}
-                </div>
+              <div className="flex-1 overflow-hidden">
+                <TabsContent value="html" className="h-full m-0">
+                  <MonacoEditor language="html" value={code.html} onChange={(v) => handleCodeChange("html", v)} theme={theme} />
+                </TabsContent>
+                <TabsContent value="css" className="h-full m-0">
+                  <MonacoEditor language="css" value={code.css} onChange={(v) => handleCodeChange("css", v)} theme={theme} />
+                </TabsContent>
+                <TabsContent value="javascript" className="h-full m-0">
+                  <MonacoEditor language="javascript" value={code.javascript} onChange={(v) => handleCodeChange("javascript", v)} theme={theme} />
+                </TabsContent>
               </div>
+            </Tabs>
+          </EditorErrorBoundary>
 
-              <div className={`flex-1 bg-white relative ${isResizing ? "pointer-events-none select-none" : ""}`}>
-                <iframe
-                  ref={previewRef}
-                  className="absolute inset-0 w-full h-full border-0"
-                  title="Live Preview"
-                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
-                />
+          <PreviewErrorBoundary>
+            <div className="flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center gap-2">
+                <Play className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-gray-900 dark:text-white">Live Preview</span>
               </div>
-              {isResizing && (
-                <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize"></div>
-              )}
+              <iframe ref={previewRef} className="flex-1 w-full border-0 bg-white" title="Live Preview" sandbox="allow-scripts allow-forms allow-popups allow-modals" />
             </div>
-          )}
-
+          </PreviewErrorBoundary>
         </div>
-
-              className={`shrink-0 z-10 transition-colors ${
-                isMobile
-                  ? "h-2 w-full cursor-row-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
-                  : "w-2 h-full cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600"
-              }`}
-
-        
-
-
-
-
-
-        {/* Main Container - Code Editor + Preview */}
-        <div
-          ref={containerRef}
-          className="flex-1 flex overflow-hidden"
-        >
-          {/* CODE EDITOR */}
-          {(layout === "code" || layout === "split") && (
-  <EditorErrorBoundary>
-  <div
-  style={
-    layout === "split"
-      ? { 
-        width: isMobile ? "100%" : `${splitRatio}%`,
-        height: isMobile ? `${splitRatio}%` : "100%",
-        }
-      : { height: "100%", width: "100%" }
-  }
-  className="flex flex-col border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 shrink-0 transition-none"
-  >
-    <Tabs
-      value={activeTab}
-      onValueChange={(value) => setActiveTab(value as keyof CodeContent)}
-      className="flex-1 flex flex-col"
-    >
-      {/* Tabs Header */}
-      <div className="bg-white dark:bg-gray-800 border-b px-4 overflow-x-auto scrollbar-hide">
-        <TabsList className="flex w-full min-w-max">
-        <TabsTrigger value="html" className="flex-1">HTML</TabsTrigger>
-        <TabsTrigger value="css" className="flex-1">CSS</TabsTrigger>
-          <TabsTrigger value="javascript" className="flex-1">JS</TabsTrigger>
-                  
-        </TabsList>
       </div>
-
-      {/* Tabs Content */}
-      <div className="flex-1 overflow-hidden">
-        <TabsContent value="html" className="h-full m-0">
-          <MonacoEditor
-            language="html"
-            value={code.html}
-            onChange={(value) => handleCodeChange("html", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-
-        <TabsContent value="css" className="h-full m-0">
-          <MonacoEditor
-            language="css"
-            value={code.css}
-            onChange={(value) => handleCodeChange("css", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-
-        <TabsContent value="javascript" className="h-full m-0">
-          <MonacoEditor
-            language="javascript"
-            value={code.javascript}
-            onChange={(value) => handleCodeChange("javascript", value)}
-            theme={theme}
-            onEditorReady={(ed) => (activeEditorRef.current = ed)}
-          />
-        </TabsContent>
-      </div>
-    </Tabs>
-  </div>
-  </EditorErrorBoundary>
-)}
-
-          {/* RESIZER - DESKTOP ONLY */}
-          {layout === "split" && !isMobile && (
-            <div
-              onMouseDown={handleDragStart}
-              onTouchStart={handleDragStart}
-              onDragStart={(e) => e.preventDefault()}
-              className="w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 active:bg-blue-600 transition shrink-0 z-10"
-
-            />
-          )}
-
-          {/* Preview panel */}
-          {(layout === "preview" || layout === "split") && (
-            <PreviewErrorBoundary>
-            <div
-              style={
-                layout === "split"
-                  ? isMobile
-                    ? { height: `${100 - splitRatio}%` }
-                    : { width: `${100 - splitRatio}%` }
-                  : { flex: 1 }
-              }
-              className="flex flex-col overflow-hidden shrink-0"
-            >
-
-              <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Play className="w-4 h-4 text-green-600 shrink-0" />
-                  <span className="font-medium text-gray-900 dark:text-white">Live Preview</span>
-                  <Badge variant="secondary" className="text-xs shrink-0">
-                    {autoRun ? "Auto-refresh" : "Manual"}
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoRun(!autoRun)}
-                    className="shrink-0"
-                  >
-                    {autoRun ? "Pause" : "Resume"}
-                  </Button>
-                  {!autoRun && (
-                    <Button size="sm" onClick={runCodeManually} className="shrink-0">
-                      Run
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className={`flex-1 bg-white dark:bg-gray-900 relative ${
-                  isResizing ? "pointer-events-none" : ""
-                }`}
-              >
-                <iframe
-                  ref={previewRef}
-                  className="absolute inset-0 w-full h-full border-0"
-                  title="Live Preview"
-                  sandbox="allow-scripts allow-forms allow-popups allow-modals"
-                />
-                {isResizing && (
-                  <div className="absolute inset-0 z-20 cursor-row-resize md:cursor-col-resize" />
-                )}
-              </div>
-              {/* Console Panel */}
-              <div className={`border-t border-gray-200 dark:border-gray-700 bg-gray-950 transition-all ${consoleOpen ? "h-36" : "h-8"}`}>
-                <div
-                  className="flex items-center justify-between px-3 h-8 cursor-pointer select-none"
-                  onClick={() => setConsoleOpen((o) => !o)}
-                >
-                  <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
-                    <span>Console</span>
-                    {consoleErrors.length > 0 && (
-                      <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                        {consoleErrors.length}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {consoleErrors.length > 0 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setConsoleErrors([]) }}
-                        className="text-[10px] text-gray-500 hover:text-gray-300"
-                      >
-                        Clear
-                      </button>
-                    )}
-                    <span className="text-gray-500 text-xs">{consoleOpen ? "▼" : "▲"}</span>
-                  </div>
-                </div>
-                {consoleOpen && (
-                  <div className="overflow-y-auto h-28 px-3 py-1 space-y-1">
-                    {consoleErrors.length === 0 ? (
-                      <p className="text-xs text-gray-500 font-mono">No errors</p>
-                    ) : (
-                      consoleErrors.map((err, i) => (
-                        <div key={i} className="text-xs font-mono text-red-400">
-                          {err.line ? `[${err.line}:${err.col}] ` : ""}{err.message}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-              {PreviewPanel}
-            </div>
-            </PreviewErrorBoundary>
-          )}
-        </div>
-
-        {/* ── MOBILE BOTTOM NAV ── */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-stretch h-14">
-            {bottomNavItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={item.action}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors active:scale-95
-                  ${item.active
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-500 dark:text-gray-400"
-                  }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </nav>
-
-
-      </div>
-    </>
     </AppErrorBoundary>
   )
 }
