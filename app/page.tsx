@@ -1306,7 +1306,13 @@ const handleDragEnd = useCallback(() => {
   useEffect(() => { codeRef.current = code }, [code])
 
 
+  const codeRef = useRef<CodeContent>(code)
+  const htmlValidation = useMemo(() => validateHtmlSyntax(code.html), [code.html])
+  // Keep codeRef in sync so beforeunload always has the latest values
+
+
   // Save template snapshots
+
   useEffect(() => {
     const timer = setTimeout(() => {
       try { localStorage.setItem("webify_template_snapshots", JSON.stringify(templateSnapshots)) } catch {}
@@ -1327,7 +1333,15 @@ const handleDragEnd = useCallback(() => {
   }, [templateSnapshots])
 
 
+  // Column resizer: start dragging handler for desktop resizer
+  const handleMouseDown = () => {
+    handleDragStart()
+    document.body.style.cursor = "col-resize"
+  }
+
+
   // Theme init
+
 
 
   // Auto-save per-template snapshots to localStorage, debounced 500ms
@@ -1954,6 +1968,7 @@ useEffect(() => {
         </header>
 
 
+
         {/* ── MAIN WORKSPACE ── */}
         <div
           ref={containerRef}
@@ -1990,6 +2005,7 @@ useEffect(() => {
               }`}
 
         
+
 
 
 
