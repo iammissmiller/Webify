@@ -1127,119 +1127,12 @@ export default function CodeEditor() {
   }, [code])
 
   useEffect(() => {
-
-    if (!previewRef.current || !autoRun) return
-    if (!htmlValidation.isValid) {
-      previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
-      return
-    }
-
-    const combinedCode = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Live Preview</title>
-        <style>${code.css}</style>
-      </head>
-      <body>
-        ${code.html}
-        <script>
-          (function() {
-            var _killTimer = setTimeout(function() {
-              document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
-            }, 5000);
-            try {
-              ${code.javascript}
-              if (typeof startStop === 'function') window.startStop = startStop;
-              if (typeof reset === 'function') window.reset = reset;
-              if (typeof handleCTA === 'function') window.handleCTA = handleCTA;
-              if (typeof handleAction === 'function') window.handleAction = handleAction;
-              if (typeof addTodo === 'function') window.addTodo = addTodo;
-              if (typeof deleteTodo === 'function') window.deleteTodo = deleteTodo;
-              if (typeof toggleTodo === 'function') window.toggleTodo = toggleTodo;
-              if (typeof filterTodos === 'function') window.filterTodos = filterTodos;
-              if (typeof clearCompleted === 'function') window.clearCompleted = clearCompleted;
-            } catch(e) {
-              clearTimeout(_killTimer);
-              var el = document.createElement('div');
-              el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-              el.textContent = '⚠️ JS Error: ' + e.message;
-              document.body.appendChild(el);
-              return;
-            }
-            clearTimeout(_killTimer);
-          })();
-        <\/script>
-      </body>
-      </html>
-    `
-        
-    
-    const blob = new Blob([combinedCode], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    previewRef.current.src = url
-
-    return () => URL.revokeObjectURL(url)
-  }, [code, htmlValidation, autoRun])
-
-  const runCodeManually = () => {
-main
     if (!previewRef.current) return
     const htmlValidation = validateHtmlSyntax(code.html)
     if (!htmlValidation.isValid) {
       previewRef.current.srcdoc = createPreviewErrorHtml(htmlValidation.message ?? "Invalid HTML syntax.")
       return
     }
-
-    const combinedCode = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Live Preview</title>
-      <style>${code.css}</style>
-    </head>
-    <body>
-      ${code.html}
-      <script>
-        (function() {
-          var _killTimer = setTimeout(function() {
-            document.body.innerHTML = '<div style="padding:20px;color:red;font-family:monospace;font-size:14px;">⚠️ Script timed out after 5 seconds — possible infinite loop.</div>';
-          }, 5000);
-          try {
-            ${code.javascript}
-            if (typeof startStop === 'function') window.startStop = startStop;
-            if (typeof reset === 'function') window.reset = reset;
-            if (typeof handleCTA === 'function') window.handleCTA = handleCTA;
-            if (typeof handleAction === 'function') window.handleAction = handleAction;
-            if (typeof addTodo === 'function') window.addTodo = addTodo;
-            if (typeof deleteTodo === 'function') window.deleteTodo = deleteTodo;
-            if (typeof toggleTodo === 'function') window.toggleTodo = toggleTodo;
-            if (typeof filterTodos === 'function') window.filterTodos = filterTodos;
-            if (typeof clearCompleted === 'function') window.clearCompleted = clearCompleted;
-          } catch(e) {
-            clearTimeout(_killTimer);
-            var el = document.createElement('div');
-            el.style.cssText = 'padding:20px;color:red;font-family:monospace;font-size:14px;';
-            el.textContent = '⚠️ JS Error: ' + e.message;
-            document.body.appendChild(el);
-            return;
-          }
-          clearTimeout(_killTimer);
-        })();
-      <\/script>
-    </body>
-    </html>
-  `
-
-    const blob = new Blob([combinedCode], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    previewRef.current.src = url
-  }
-
 
     const combinedCode = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${code.css}</style></head><body>${code.html}<script>(function(){try{${code.javascript}}catch(e){var el=document.createElement('div');el.style.cssText='padding:12px;color:#b91c1c;font-family:monospace;';el.textContent='JS Error: '+e.message;document.body.appendChild(el)}})()<\/script></body></html>`
     previewRef.current.srcdoc = combinedCode
